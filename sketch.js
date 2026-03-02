@@ -6,7 +6,7 @@ function setup() {
 }
 
 function draw() {
-  background(40);
+  background(0);
   simulation.update();
   simulation.display();
 }
