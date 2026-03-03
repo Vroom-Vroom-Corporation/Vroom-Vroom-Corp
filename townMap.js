@@ -3,6 +3,7 @@ class TownMap {
     this.width = width;
     this.height = height;
     this.gridSize = gridSize;
+    this.thermounclearbomb=0;
   }
 
   getRandomLocation() {
@@ -11,7 +12,7 @@ class TownMap {
       y: floor(random(this.height / this.gridSize)) * this.gridSize + this.gridSize / 2
     };
   }
-
+//hi andre  
   getDistance(loc1, loc2) {
     return dist(loc1.x, loc1.y, loc2.x, loc2.y);
   }

@@ -6,7 +6,8 @@ function setup() {
 }
 
 function draw() {
-  background(0);
+ // background(0);
+ // Circle(400, 300, 50);
   simulation.update();
   simulation.display();
 }
