@@ -19,6 +19,7 @@ class TownMap {
   }
 
   drawGrid() {
+    //lol put a image of google earth or smth
     stroke(170);
     for (let x = 0; x < this.width; x += this.gridSize) {
       line(x, 0, x, this.height);

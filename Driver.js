@@ -1,11 +1,18 @@
 class Driver {
   constructor(id, locationX, locationY, capacity = 4, amenities = []) {
-    // Allow passing either a p5.Vector or separate x/y coordinates
+    // Allow passing a p5.Vector, a plain object with x/y, or separate numbers
     this.id = id;
 
     if (locationX instanceof p5.Vector) {
       // copy so external changes don't affect internal state
       this.location = locationX.copy();
+    } else if (
+      locationX &&
+      typeof locationX.x === "number" &&
+      typeof locationX.y === "number"
+    ) {
+      // plain object {x, y} from TownMap.getRandomLocation
+      this.location = createVector(locationX.x, locationX.y);
     } else {
       this.location = createVector(locationX, locationY);
     }

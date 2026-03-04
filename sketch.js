@@ -1,5 +1,5 @@
 let simulation;
-let car;
+//let car;
 function setup() {
   createCanvas(800, 600);
 
@@ -11,10 +11,10 @@ function setup() {
 }
 
 function draw() {
- // background(0);
+  background(0);
  // Circle(400, 300, 50);
-  car.update();
-  car.display();
+ // car.update();
+ // car.display();
   simulation.update();
   simulation.display();
   circle(mouseX, mouseY, 10);

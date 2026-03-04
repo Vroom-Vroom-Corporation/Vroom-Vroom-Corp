@@ -41,8 +41,9 @@ class SimulationController {
 
   spawnRandomDriver() {
     const loc = this.map.getRandomLocation();
-    // Driver constructor now accepts a p5.Vector directly
-    const driver = new Driver("D" + this.driverCounter++, loc);
+    // convert to p5.Vector so the driver has a proper location
+    const vec = createVector(loc.x, loc.y);
+    const driver = new Driver("D" + this.driverCounter++, vec);
 
     // insert into availableDrivers linked list
     this.availableDrivers.insert(driver);
