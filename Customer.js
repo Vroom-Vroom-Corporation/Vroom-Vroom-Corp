@@ -6,6 +6,7 @@ class Customer {
     this.amenitiesRequired = amenitiesRequired;
 
     this.requestTime = millis();
+    // face image, subscrip plan ap ayp check canva
   }
 
   display() {

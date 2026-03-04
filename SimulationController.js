@@ -9,7 +9,7 @@ class SimulationController {
     this.pendingRequests = new LinkedList();
     this.activeMatches = null;
     this.expiredRequests = null;
-    this.eventLog = null;
+    this.eventLog = null; //event log might incude active and expired requests, or we can have separate logs for each
 
     this.spawnInterval = 180;
     this.frameCounter = 0;
@@ -21,7 +21,7 @@ class SimulationController {
   update() {
     this.frameCounter++;
 
-    if (this.frameCounter % this.spawnInterval === 0) {
+    if (this.frameCounter % this.spawnInterval === 0) { //temp spawn logic
       this.spawnRandomDriver();
       this.spawnRandomCustomer();
     }
@@ -43,7 +43,8 @@ class SimulationController {
     let loc = this.map.getRandomLocation();
     let driver = new Driver("D" + this.driverCounter++, loc);
 
-    // TODO: Insert into availableDrivers linked list
+    // TODO: Insert into availableDrivers linked list <<<<<
+    this.availableDrivers.insert(driver);
   }
 
   spawnRandomCustomer() {
@@ -56,9 +57,10 @@ this.pendingRequests.insert(customer);
   updateDrivers() {
     // TODO:
     // Traverse driver list and call driver.update()
+    this.availableDrivers.traverse((driver) => driver.update());
   }
 
-  processMatching() {
+  processMatching() {//<match algo
     /*
       STUDENTS IMPLEMENT:
 
@@ -72,7 +74,7 @@ this.pendingRequests.insert(customer);
     */
   }
 
-  handleExpirations() {
+  handleExpirations() {//<
     /*
       STUDENTS IMPLEMENT:
 
@@ -134,5 +136,6 @@ this.pendingRequests.insert(customer);
     textSize(14);
     textAlign(LEFT);
     text("Ride-Share Simulation", 20, 25);
+    //ui here, maybe show number of pending requests, available drivers, etc.
   }
 }

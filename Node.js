@@ -3,7 +3,7 @@ class Node {
     this.data = data;
     this.next = null;
     //test update
-    let a = 1;
+    //let a = 1;
     
   }
 }
