@@ -2,9 +2,11 @@ class SimulationController {
   constructor(width, height) {
     this.map = new TownMap(width, height);
 
+
+    
     // STUDENTS MUST INITIALIZE THESE AS LINKED LISTS
-    this.availableDrivers = null;
-    this.pendingRequests = null;
+    this.availableDrivers = new LinkedList();
+    this.pendingRequests = new LinkedList();
     this.activeMatches = null;
     this.expiredRequests = null;
     this.eventLog = null;
@@ -47,7 +49,7 @@ class SimulationController {
   spawnRandomCustomer() {
     let loc = this.map.getRandomLocation();
     let customer = new Customer("C" + this.customerCounter++, loc);
-
+this.pendingRequests.insert(customer);
     // TODO: Insert into pendingRequests linked list
   }
 
@@ -83,10 +85,48 @@ class SimulationController {
 
   renderDrivers() {
     // Traverse availableDrivers list and call render()
+  //   if (this.head===null)
+  // {
+  //   return
+  // }
+  //   else{
+  //     let prev=null;
+  //     let current= this.head;
+  //     for(let i=0; i<this.size; i++)
+  //       {
+  //         while(current.data!==i)
+  //           {
+  //              prev=current;
+  //              //prev.isdeleverd=true;
+  //             current=current.next;
+  //           }
+  //         if(current.data==i)
+  //           current.display();
+  //       }
+  //   }
   }
 
   renderCustomers() {
     // Traverse pendingRequests list and call render()
+  //   if (this.head===null)
+  // {
+  //   return
+  // }
+  //   else{
+  //     let prev=null;
+  //     let current= this.head;
+  //     for(let i=0; i<this.size; i++)
+  //       {
+  //         while(current.data!==i)
+  //           {
+  //              prev=current;
+  //              //prev.isdeleverd=true;
+  //             current=current.next;
+  //           }
+  //         if(current.data==i)
+  //           current.display();
+  //       }
+  //   }
   }
 
   renderHUD() {
