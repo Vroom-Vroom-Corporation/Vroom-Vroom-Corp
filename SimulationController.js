@@ -40,18 +40,18 @@ class SimulationController {
   }
 
   spawnRandomDriver() {
-    let loc = this.map.getRandomLocation();
-    let driver = new Driver("D" + this.driverCounter++, loc);
+    const loc = this.map.getRandomLocation();
+    // Driver constructor now accepts a p5.Vector directly
+    const driver = new Driver("D" + this.driverCounter++, loc);
 
-    // TODO: Insert into availableDrivers linked list <<<<<
+    // insert into availableDrivers linked list
     this.availableDrivers.insert(driver);
   }
 
   spawnRandomCustomer() {
-    let loc = this.map.getRandomLocation();
-    let customer = new Customer("C" + this.customerCounter++, loc);
-this.pendingRequests.insert(customer);
-    // TODO: Insert into pendingRequests linked list
+    const loc = this.map.getRandomLocation();
+    const customer = new Customer("C" + this.customerCounter++, loc);
+    this.pendingRequests.insert(customer);
   }
 
   updateDrivers() {
@@ -86,49 +86,21 @@ this.pendingRequests.insert(customer);
   }
 
   renderDrivers() {
-    // Traverse availableDrivers list and call render()
-  //   if (this.head===null)
-  // {
-  //   return
-  // }
-  //   else{
-  //     let prev=null;
-  //     let current= this.head;
-  //     for(let i=0; i<this.size; i++)
-  //       {
-  //         while(current.data!==i)
-  //           {
-  //              prev=current;
-  //              //prev.isdeleverd=true;
-  //             current=current.next;
-  //           }
-  //         if(current.data==i)
-  //           current.display();
-  //       }
-  //   }
+    // walk the availableDrivers linked list and call display() on each
+    this.availableDrivers.traverse((driver) => {
+      if (driver && typeof driver.display === "function") {
+        driver.display();
+      }
+    });
   }
 
   renderCustomers() {
-    // Traverse pendingRequests list and call render()
-  //   if (this.head===null)
-  // {
-  //   return
-  // }
-  //   else{
-  //     let prev=null;
-  //     let current= this.head;
-  //     for(let i=0; i<this.size; i++)
-  //       {
-  //         while(current.data!==i)
-  //           {
-  //              prev=current;
-  //              //prev.isdeleverd=true;
-  //             current=current.next;
-  //           }
-  //         if(current.data==i)
-  //           current.display();
-  //       }
-  //   }
+    // walk the pendingRequests linked list and draw each customer
+    this.pendingRequests.traverse((cust) => {
+      if (cust && typeof cust.display === "function") {
+        cust.display();
+      }
+    });
   }
 
   renderHUD() {

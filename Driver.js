@@ -1,7 +1,15 @@
 class Driver {
   constructor(id, locationX, locationY, capacity = 4, amenities = []) {
+    // Allow passing either a p5.Vector or separate x/y coordinates
     this.id = id;
-    this.location = createVector(locationX,locationY);
+
+    if (locationX instanceof p5.Vector) {
+      // copy so external changes don't affect internal state
+      this.location = locationX.copy();
+    } else {
+      this.location = createVector(locationX, locationY);
+    }
+
     this.capacity = capacity;
     this.amenities = amenities;
 
