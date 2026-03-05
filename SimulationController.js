@@ -16,13 +16,14 @@ class SimulationController {
 
     this.driverCounter = 1;
     this.customerCounter = 1;
+          this.spawnRandomDriver();
   }
 
   update() {
     this.frameCounter++;
 
     if (this.frameCounter % this.spawnInterval === 0) { //temp spawn logic
-      this.spawnRandomDriver();
+
       this.spawnRandomCustomer();
     }
 
@@ -108,7 +109,7 @@ class SimulationController {
     fill(0);
     textSize(14);
     textAlign(LEFT);
-    text("Ride-Share Simulation", 20, 25);
+    text("Vroom Vroom", 20, 25);
     //ui here, maybe show number of pending requests, available drivers, etc.
   }
 }
