@@ -4,12 +4,7 @@ class LinkedList {
     this.size = 0;
   }
 
-  /**
-   * Add a new element to the end of the list. The value can be any object
-   * (Driver, Customer, primitive, etc.). Internally we always wrap it in a
-   * Node instance so that consumers don't have to know about the list
-   * representation.
-   */
+  
   insert(data) {
     const node = new Node(data);
     if (this.head === null) {
@@ -25,10 +20,7 @@ class LinkedList {
     console.log(`Inserted: ${data}`);
   }
 
-  /**
-   * Walks the list and calls `callback` for each item. The item passed is the
-   * original value supplied to `insert` (not the internal Node).
-   */
+  
   traverse(callback) {
     let current = this.head;
     while (current !== null) {
@@ -37,10 +29,7 @@ class LinkedList {
     }
   }
 
-  /**
-   * Returns the first element for which `predicate(element)` returns true, or
-   * null if none match.
-   */
+
   search(predicate) {
     let current = this.head;
     while (current !== null) {
@@ -52,14 +41,11 @@ class LinkedList {
     return null;
   }
 
-  /**
-   * Remove the first element satisfying the predicate. Returns true if an
-   * element was removed, false otherwise.
-   */
-  delete(predicate) {
+  
+  delete(remove) {
     if (!this.head) return false;
 
-    if (predicate(this.head.data)) {
+    if (remove(this.head.data)) {
       this.head = this.head.next;
       this.size--;
       return true;
@@ -68,7 +54,7 @@ class LinkedList {
     let prev = this.head;
     let current = this.head.next;
     while (current !== null) {
-      if (predicate(current.data)) {
+      if (remove(current.data)) {
         prev.next = current.next;
         this.size--;
         return true;

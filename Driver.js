@@ -24,22 +24,48 @@ class Driver {
     this.status = "AVAILABLE";
     this.currentRide = null;
     this.busyTimer = 0;
+        
+    this.speed =2;
   }
 
   assignRide(request, duration) {
-    this.status = "BUSY";
+    this.status = "EN_ROUTE";
     this.currentRide = request;
     this.busyTimer = duration;
     this.target = request;
-    this.state = "BUSY"
+    this.state = "EN_ROUTE"
   }
 
   update() {
-    if (this.status === "BUSY") {
+    if (this.status === "EN_ROUTE") {
       this.busyTimer--;
       if (this.busyTimer <= 0) {
         this.status = "AVAILABLE";
         this.currentRide = null;
+        this.target = null;
+        this.state = null;
+      }
+    }
+
+    // Only proceed with movement if we have a target and a passenger
+    if (!this.target || !this.currentRide) return;
+    
+    this.moveManhattan();
+    let passenger = this.currentRide;
+    console.log(passenger.status, passenger.Pickedup, passenger.atdestination);
+    if (passenger.status === "MATCHED") {
+      if (this.atTarget()) {
+        passenger.Pickedup = true;
+        passenger.status = "TRAVELLING";
+        // Wrap destination as {location: {x, y}} for moveManhattan compatibility
+        this.target = { location: passenger.destination };
+        //this.state = "TO_DESTINATION";
+      }
+    } else if (passenger.Pickedup && !passenger.atdestination) {
+      if (this.atTarget()) {
+        passenger.atdestination = true;
+        passenger.status = "DELIVERED";
+        this.state = "IDLE";
       }
     }
   }
@@ -61,16 +87,24 @@ moveManhattan() {
     }
   }
   atTarget() {
-    return (
-      this.location.x === this.target.location.x &&
-      this.location.y === this.target.location.y
+    let distance = dist(
+      this.location.x,
+      this.location.y,
+      this.target.location.x,
+      this.target.location.y
     );
-
+    return distance < 5;
   }
   display() {
-    fill(this.status === "AVAILABLE" ? "green" : "red");
+      fill(
+      this.state === "IDLE"
+        ? "grey"
+        : this.state === "EN_ROUTE"
+        ? "orange"
+        : "blue"
+    )
     ellipse(this.location.x, this.location.y, 22);
-    fill(0);
+    fill(255);
     textSize(10);
     textAlign(CENTER);
     text(this.id, this.location.x, this.location.y - 15);

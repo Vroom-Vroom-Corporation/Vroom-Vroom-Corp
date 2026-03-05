@@ -52,7 +52,8 @@ class SimulationController {
 
   spawnRandomCustomer() {
     const loc = this.map.getRandomLocation();
-    const customer = new Customer("C" + this.customerCounter++, loc);
+    const dest = this.map.getRandomLocation();
+    const customer = new Customer("C" + this.customerCounter++, loc, dest);
     this.pendingRequests.insert(customer);
   }
 
@@ -62,18 +63,23 @@ class SimulationController {
     this.availableDrivers.traverse((driver) => driver.update());
   }
 
-  processMatching() {//<match algo
-    /*
-      STUDENTS IMPLEMENT:
+  processMatching() {
+    // Get the first pending customer
+    const firstCustomer = this.pendingRequests.search(() => true);
+    
+    // Get the first available driver
+    const driver = this.availableDrivers.search(
+      (d) => d.status === "AVAILABLE"
+    );
+    
+    // If both exist, assign the customer as the driver's target
+    if (driver && firstCustomer) {
+      driver.assignRide(firstCustomer, 300);
+      firstCustomer.aknowledgeMatch();
 
-      1. Traverse pendingRequests
-      2. For each request:
-         - Traverse availableDrivers
-         - Compute composite score
-         - Select best driver
-      3. Move nodes between lists
-      4. Add event to eventLog
-    */
+      // Remove the customer from pendingRequests
+      this.pendingRequests.delete((c) => c.id === firstCustomer.id);
+    }
   }
 
   handleExpirations() {//<
