@@ -18,5 +18,6 @@ class Customer {
     textSize(10);
     textAlign(CENTER);
     text(this.id, this.location.x, this.location.y - 14);
+    //when picked up, change from pickup location to dropoff location, and change color to purple or smth
   }
 }
