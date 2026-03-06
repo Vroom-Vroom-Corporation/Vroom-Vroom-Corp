@@ -14,8 +14,8 @@ class TownMap {
   }
 //hi andre  
   getDistance(loc1, loc2) {
-    return dist(loc1.x, loc1.y, loc2.x, loc2.y);
-    //get ai to change this into mhnattan moveo
+    return (loc2.x - loc1.x) + (loc2.y - loc1.y);
+   
   }
 
   drawGrid() {

@@ -16,7 +16,11 @@ class SimulationController {
 
     this.driverCounter = 1;
     this.customerCounter = 1;
+    //temp 3 drivers
           this.spawnRandomDriver();
+           this.spawnRandomDriver();
+            this.spawnRandomDriver();
+            
   }
 
   update() {
@@ -28,8 +32,9 @@ class SimulationController {
     }
 
     this.updateDrivers();
+    this.updateCustomers();
 
-  //  this.processMatching();      // STUDENTS IMPLEMENT
+   this.processMatching();      // STUDENTS IMPLEMENT
     this.handleExpirations();    // STUDENTS IMPLEMENT
   }
 
@@ -61,6 +66,11 @@ class SimulationController {
     // TODO:
     // Traverse driver list and call driver.update()
     this.availableDrivers.traverse((driver) => driver.update());
+  }
+
+  updateCustomers() {
+    this.pendingRequests.traverse((customer) => customer.update());
+    this.activeMatches.traverse((customer) => customer.update());
   }
 
   processMatching() {
@@ -106,6 +116,9 @@ class SimulationController {
   renderCustomers() {
     // walk the pendingRequests linked list and draw each customer
     this.pendingRequests.traverse((cust) => {
+      if (cust.status === "EXPIRED") {
+        this.pendingRequests.delete((c) => c.id === cust.id);
+      }
       if (cust && typeof cust.display === "function") {
         cust.display();
       }
@@ -113,6 +126,9 @@ class SimulationController {
     
     // also render matched/in-transit customers
     this.activeMatches.traverse((cust) => {
+      if (cust.status === "EXPIRED") {
+        this.activeMatches.delete((c) => c.id === cust.id);
+      }
       if (cust && typeof cust.display === "function") {
         cust.display();
         if (cust.status === "DELIVERED") {

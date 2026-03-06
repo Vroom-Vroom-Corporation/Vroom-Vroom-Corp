@@ -9,7 +9,7 @@ class Customer {
     this.status = "PENDING"; // PENDING, MATCHED, EXPIRED
     this.Pickedup = false;
     this.atdestination = false;
-  
+    this.expireTime = this.requestTime + int(random(1000,10000)); // expires after 20 seconds
     // face image, subscrip plan ap ayp check canva
   }
 
@@ -18,8 +18,13 @@ class Customer {
   }
 
   update() {  
-
+    console.log("deezx");
+    if (millis() > this.expireTime) {
+      if(this.status === "PENDING"||this.status === "MATCHED") {
+      this.status = "EXPIRED";
+    }    
   }
+}
 
   display() {
     if (this.status === "PENDING") {

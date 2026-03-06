@@ -70,6 +70,12 @@ class Driver {
         this.target = null;
         this.state = "IDLE";
       }
+    } else if (passenger.status === "EXPIRED") {
+      // If the passenger expired while we were en route, drop the ride
+      this.status = "AVAILABLE";
+      this.currentRide = null;
+      this.target = null;
+      this.state = "IDLE";
     }
   }
 moveManhattan() {
