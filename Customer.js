@@ -26,23 +26,36 @@ class Customer {
     fill(100,100,255); //blue
     rectMode(CENTER);
     rect(this.location.x, this.location.y, 18, 18);
+        fill(255);
+    textSize(10);
+    textAlign(CENTER);
+    text(this.id, this.location.x, this.location.y - 14);
     } else if (this.status === "MATCHED") {
       fill(255, 100, 100);
       rectMode(CENTER);
       rect(this.location.x, this.location.y, 18, 18);
+          fill(255);
+    textSize(10);
+    textAlign(CENTER);
+    text(this.id, this.location.x, this.location.y - 14);
     }  else if (this.status === "TRAVELLING") {
-      fill(255, 100, 100);
+      fill(255);
       rectMode(CENTER);
       rect(this.destination.x, this.destination.y, 18, 18);
+          fill(255);
+    textSize(10);
+    textAlign(CENTER);
+    text(this.id, this.destination.x, this.destination.y - 14);
     }  else if (this.status === "EXPIRED") {
       fill(150);
       rectMode(CENTER);
       rect(this.location.x, this.location.y, 18, 18);
-    }
-    fill(255);
-    textSize(10);
-    textAlign(CENTER);
-    text(this.id, this.location.x, this.location.y - 14);
+    }  else if (this.status === "DELIVERED") {
+      fill(0,255,0);
+      rectMode(CENTER);
+      rect(this.destination.x, this.destination.y, 18, 18);
+     }
+
     //when picked up, change from pickup location to dropoff location, and change color to purple or smth
   }
 }

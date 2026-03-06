@@ -7,7 +7,7 @@ class SimulationController {
     // STUDENTS MUST INITIALIZE THESE AS LINKED LISTS
     this.availableDrivers = new LinkedList();
     this.pendingRequests = new LinkedList();
-    this.activeMatches = null;
+    this.activeMatches = new LinkedList();
     this.expiredRequests = null;
     this.eventLog = null; //event log might incude active and expired requests, or we can have separate logs for each
 
@@ -29,7 +29,7 @@ class SimulationController {
 
     this.updateDrivers();
 
-    this.processMatching();      // STUDENTS IMPLEMENT
+  //  this.processMatching();      // STUDENTS IMPLEMENT
     this.handleExpirations();    // STUDENTS IMPLEMENT
   }
 
@@ -77,8 +77,9 @@ class SimulationController {
       driver.assignRide(firstCustomer, 300);
       firstCustomer.aknowledgeMatch();
 
-      // Remove the customer from pendingRequests
+      // Move the customer from pendingRequests to activeMatches
       this.pendingRequests.delete((c) => c.id === firstCustomer.id);
+      this.activeMatches.insert(firstCustomer);
     }
   }
 
@@ -107,6 +108,19 @@ class SimulationController {
     this.pendingRequests.traverse((cust) => {
       if (cust && typeof cust.display === "function") {
         cust.display();
+      }
+    });
+    
+    // also render matched/in-transit customers
+    this.activeMatches.traverse((cust) => {
+      if (cust && typeof cust.display === "function") {
+        cust.display();
+        if (cust.status === "DELIVERED") {
+          // Move to expiredRequests or event log as needed
+          this.activeMatches.delete((c) => c.id === cust.id);
+          // this.expiredRequests.insert(cust); // if you want to keep track of delivered customers
+        }
+
       }
     });
   }

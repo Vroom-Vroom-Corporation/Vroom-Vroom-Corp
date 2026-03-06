@@ -37,15 +37,15 @@ class Driver {
   }
 
   update() {
-    if (this.status === "EN_ROUTE") {
-      this.busyTimer--;
-      if (this.busyTimer <= 0) {
-        this.status = "AVAILABLE";
-        this.currentRide = null;
-        this.target = null;
-        this.state = null;
-      }
-    }
+    // if (this.status === "EN_ROUTE") {
+    //   this.busyTimer--;
+    //   if (this.busyTimer <= 0) {
+    //     this.status = "AVAILABLE";
+    //     this.currentRide = null;
+    //     this.target = null;
+    //     this.state = null;
+    //   }
+    // }
 
     // Only proceed with movement if we have a target and a passenger
     if (!this.target || !this.currentRide) return;
@@ -59,12 +59,15 @@ class Driver {
         passenger.status = "TRAVELLING";
         // Wrap destination as {location: {x, y}} for moveManhattan compatibility
         this.target = { location: passenger.destination };
-        //this.state = "TO_DESTINATION";
+        this.state = "TO_DESTINATION";
       }
     } else if (passenger.Pickedup && !passenger.atdestination) {
       if (this.atTarget()) {
         passenger.atdestination = true;
         passenger.status = "DELIVERED";
+        this.status = "AVAILABLE";
+        this.currentRide = null;
+        this.target = null;
         this.state = "IDLE";
       }
     }

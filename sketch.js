@@ -19,3 +19,9 @@ function draw() {
   simulation.display();
   circle(mouseX, mouseY, 10);
 }
+
+function mouseReleased() {
+
+  simulation.processMatching();  
+  console.log("Matching processed");
+}
