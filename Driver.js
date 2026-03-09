@@ -1,5 +1,5 @@
 class Driver {
-  constructor(id, locationX, locationY, capacity = 4, amenities = []) {
+  constructor(id, locationX, locationY, capacity = int(random(1, 4)), amenities = []) {
     // Allow passing a p5.Vector, a plain object with x/y, or separate numbers
     this.id = id;
 
@@ -25,7 +25,7 @@ class Driver {
     this.currentRide = null;
     this.busyTimer = 0;
         
-    this.speed =2;
+    this.speed = int(random(1, 4)); // unique speed for each driver
   }
 
   assignRide(request, duration) {
@@ -84,6 +84,13 @@ moveManhattan() {
     let targetX = this.target.location.x;
     let targetY = this.target.location.y;
 
+    if(abs(targetX - this.location.x) < this.speed) {
+      this.location.x = targetX;
+    }
+    if(abs(targetY - this.location.y) < this.speed) {
+      this.location.y = targetY;
+    }
+
     // Move horizontally first
     if (this.location.x !== targetX) {
       let dir = Math.sign(targetX - this.location.x); 
@@ -117,5 +124,7 @@ moveManhattan() {
     textSize(10);
     textAlign(CENTER);
     text(this.id, this.location.x, this.location.y - 15);
+    text("C:" + this.capacity, this.location.x+15, this.location.y);
+        text("S:" + this.speed, this.location.x-15, this.location.y);
   }
 }

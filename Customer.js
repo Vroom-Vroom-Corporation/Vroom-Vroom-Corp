@@ -2,14 +2,14 @@ class Customer {
   constructor(id, location, destination) {
     this.id = id;
     this.location = location;
-    this.passengers = 0;
+    this.passengers = int(random(1, 4));
     this.amenitiesRequired = null;
     this.destination = destination; // {x, y} object
     this.requestTime = millis();
     this.status = "PENDING"; // PENDING, MATCHED, EXPIRED
     this.Pickedup = false;
     this.atdestination = false;
-    this.expireTime = this.requestTime + int(random(1000,10000)); // expires after 20 seconds
+    this.expireTime = this.requestTime + int(random(10000,30000)); // expires after 20 seconds
     // face image, subscrip plan ap ayp check canva
   }
 
@@ -27,6 +27,8 @@ class Customer {
 }
 
   display() {
+   
+
     if (this.status === "PENDING") {
     fill(100,100,255); //blue
     rectMode(CENTER);
@@ -35,6 +37,8 @@ class Customer {
     textSize(10);
     textAlign(CENTER);
     text(this.id, this.location.x, this.location.y - 14);
+        text(this.passengers, this.location.x, this.location.y + 14);
+        text(Math.max(0, Math.ceil((this.expireTime - millis()) / 1000)), this.location.x-15, this.location.y );
     } else if (this.status === "MATCHED") {
       fill(255, 100, 100);
       rectMode(CENTER);
@@ -43,6 +47,8 @@ class Customer {
     textSize(10);
     textAlign(CENTER);
     text(this.id, this.location.x, this.location.y - 14);
+        text(this.passengers, this.location.x, this.location.y + 14);
+                text(Math.max(0, Math.ceil((this.expireTime - millis()) / 1000)), this.location.x-15, this.location.y );
     }  else if (this.status === "TRAVELLING") {
       fill(255);
       rectMode(CENTER);

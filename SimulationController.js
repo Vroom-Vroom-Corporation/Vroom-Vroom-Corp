@@ -77,9 +77,20 @@ class SimulationController {
     // Get the first pending customer
     const firstCustomer = this.pendingRequests.search(() => true);
     
-    // Get the first available driver
+    if (!firstCustomer) return; // no pending requests
+    
+    // Get the first available driver that can reach within time
     const driver = this.availableDrivers.search(
-      (d) => d.status === "AVAILABLE"
+      (d) => {
+        if (d.status !== "AVAILABLE") return false;
+        if (d.capacity < firstCustomer.passengers) return false; // capacity check
+        let distance = this.map.getDistance(d.location, firstCustomer.location);
+        let remaining_ms = firstCustomer.expireTime - millis();
+        let frames_to_reach = distance / d.speed;
+        let remaining_frames = remaining_ms * 60 / 1000; // assuming 60 FPS
+        
+        return frames_to_reach < remaining_frames;
+      }
     );
     
     // If both exist, assign the customer as the driver's target

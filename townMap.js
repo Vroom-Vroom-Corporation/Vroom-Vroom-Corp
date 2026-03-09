@@ -14,7 +14,7 @@ class TownMap {
   }
 //hi andre  
   getDistance(loc1, loc2) {
-    return (loc2.x - loc1.x) + (loc2.y - loc1.y);
+    return Math.abs(loc2.x - loc1.x) + Math.abs(loc2.y - loc1.y);
    
   }
 
