@@ -1,7 +1,8 @@
 class SimulationController {
   constructor(width, height) {
     this.map = new TownMap(width, height);
-
+    this.doomsdayclock = new UniversalDeathClock();
+    this.timeManager = new TimeManager();
 
     
     // STUDENTS MUST INITIALIZE THESE AS LINKED LISTS
@@ -10,6 +11,8 @@ class SimulationController {
     this.activeMatches = new LinkedList();
     this.expiredRequests = new LinkedList();
     this.eventLog = new LinkedList(); //event log might incude active and expired requests, or we can have separate logs for each
+    this.eventLogSize = 0;
+    this.maxEventLogSize = 50;
 
     this.spawnInterval = 180;
     this.frameCounter = 0;
@@ -17,6 +20,7 @@ class SimulationController {
     this.driverCounter = 1;
     this.customerCounter = 1;
     this.uiManager = new UIManager();
+    this.addEvent("SYSTEM", "Simulation started");
     //temp 3 drivers
           this.spawnRandomDriver();
            this.spawnRandomDriver();
@@ -57,6 +61,7 @@ class SimulationController {
 
     // insert into availableDrivers linked list
     this.availableDrivers.insert(driver);
+    this.addEvent(driver.id, `Hired with capacity ${driver.capacity} at (${Math.round(vec.x)}, ${Math.round(vec.y)})`);
   }
 
   spawnRandomCustomer() {
@@ -64,6 +69,7 @@ class SimulationController {
     const dest = this.map.getRandomLocation();
     const customer = new Customer("C" + this.customerCounter++, loc, dest);
     this.pendingRequests.insert(customer);
+    this.addEvent(customer.id, `New request with ${customer.passengers} passengers from (${Math.round(loc.x)}, ${Math.round(loc.y)}) to (${Math.round(dest.x)}, ${Math.round(dest.y)})`);
   }
 
   updateDrivers() {
@@ -101,7 +107,7 @@ class SimulationController {
     if (driver && firstCustomer) {
       driver.assignRide(firstCustomer, 300);
       firstCustomer.aknowledgeMatch();
-
+      this.addEvent("MATCH", `${firstCustomer.id} matched with ${driver.id}`);
       // Move the customer from pendingRequests to activeMatches
       this.pendingRequests.delete((c) => c.id === firstCustomer.id);
       this.activeMatches.insert(firstCustomer);
@@ -157,10 +163,10 @@ class SimulationController {
   }
 
   renderHUD() {
-    fill(0);
+    fill(255);
     textSize(14);
     textAlign(LEFT);
-    text("Vroom Vroom", 20, 25);
+    text("Vroom Vroom Corporation © 2026", 570, 25);
     //ui here, maybe show number of pending requests, available drivers, etc.
   }
 
@@ -192,6 +198,34 @@ class SimulationController {
     if (this.uiManager) {
       this.uiManager.updateCustomerList(pendingCustomers, matchedCustomers, this);
       this.uiManager.updateDriverList(allDrivers);
+      this.uiManager.updateTimeDisplay(this.timeManager);
+      this.uiManager.updateEventLog(this.eventLog);
+    }
+  }
+
+  addEvent(source, message) {
+    const timestamp = this.timeManager.getFormattedDateTime();
+    const event = {
+      timestamp: timestamp,
+      source: source,
+      message: message
+    };
+
+    this.eventLog.insert(event);
+    this.eventLogSize++;
+
+    // If event log exceeds max size, remove the oldest (first) event
+    if (this.eventLogSize > this.maxEventLogSize) {
+      let firstEvent = null;
+      this.eventLog.head.data;
+      
+      // Get the first event to delete
+      if (this.eventLog.head) {
+        firstEvent = this.eventLog.head.data;
+        // Delete the first event by matching its reference
+        this.eventLog.delete((e) => e === firstEvent);
+        this.eventLogSize--;
+      }
     }
   }
 }

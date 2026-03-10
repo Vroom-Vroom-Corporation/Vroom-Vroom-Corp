@@ -2,14 +2,15 @@ class UIManager {
   constructor() {
     this.sidebarOpen = false;
     this.activeTab = 'customers'; // 'customers' or 'drivers'
-    this.initializeSidebar();
+    this.initializeLeftSidebar();
+    this.initializeRightSidebar();
   }
 
-  initializeSidebar() {
+  initializeLeftSidebar() {
     // Create sidebar container
     const sidebar = document.createElement('div');
     sidebar.id = 'customer-sidebar';
-    sidebar.className = 'sidebar';
+    sidebar.className = 'sidebar sidebar-left';
     
     // Create toggle button
     const toggleBtn = document.createElement('button');
@@ -58,6 +59,33 @@ class UIManager {
     sidebar.appendChild(contentContainer);
     document.body.appendChild(sidebar);
     document.body.appendChild(toggleBtn);
+  }
+
+  initializeRightSidebar() {
+    // Create right sidebar
+    const rightSidebar = document.createElement('div');
+    rightSidebar.id = 'info-sidebar';
+    rightSidebar.className = 'sidebar sidebar-right';
+    
+    // Create header with clock and calendar
+    const header = document.createElement('div');
+    header.className = 'sidebar-header right-header';
+    header.innerHTML = `
+      <div class="datetime-display">
+        <div class="digital-clock" id="digital-clock">00:00:00</div>
+        <div class="calendar-display" id="calendar-display">Jan 01, 2026</div>
+      </div>
+    `;
+    
+    // Create event log container
+    const eventLogContainer = document.createElement('div');
+    eventLogContainer.id = 'event-log';
+    eventLogContainer.className = 'event-log-container';
+    eventLogContainer.innerHTML = '<h3 class="event-log-title">Event Log</h3><div class="event-list" id="event-list"></div>';
+    
+    rightSidebar.appendChild(header);
+    rightSidebar.appendChild(eventLogContainer);
+    document.body.appendChild(rightSidebar);
   }
 
   switchTab(tabName) {
@@ -257,5 +285,42 @@ class UIManager {
     `;
     
     return card;
+  }
+
+  updateTimeDisplay(timeManager) {
+    const clockElement = document.getElementById('digital-clock');
+    const calendarElement = document.getElementById('calendar-display');
+    
+    if (clockElement) {
+      clockElement.textContent = timeManager.getTimeString();
+    }
+    if (calendarElement) {
+      calendarElement.textContent = timeManager.getDateString();
+    }
+  }
+
+  updateEventLog(eventList) {
+    const eventListElement = document.getElementById('event-list');
+    if (!eventListElement) return;
+    
+    eventListElement.innerHTML = '';
+    
+    // Traverse event log in reverse to show newest first
+    const events = [];
+    eventList.traverse((event) => {
+      events.push(event);
+    });
+    
+    // Display newest events first
+    for (let i = events.length - 1; i >= 0; i--) {
+      const event = events[i];
+      const eventElement = document.createElement('div');
+      eventElement.className = 'event-item';
+      eventElement.innerHTML = `
+        <div class="event-time">${event.timestamp}</div>
+        <div class="event-message">${event.message}</div>
+      `;
+      eventListElement.appendChild(eventElement);
+    }
   }
 }

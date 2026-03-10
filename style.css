@@ -15,20 +15,30 @@ canvas {
 /* Sidebar Styles */
 .sidebar {
   position: fixed;
-  left: -350px;
   top: 0;
   width: 350px;
   height: 100vh;
   background-color: #222;
   border-right: 2px solid #444;
   overflow-y: auto;
-  transition: left 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
   z-index: 1000;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.5);
 }
 
-.sidebar.open {
+.sidebar-left {
+  left: -350px;
+}
+
+.sidebar-left.open {
   left: 0;
+}
+
+.sidebar-right {
+  right: 0;
+  border-right: none;
+  border-left: 2px solid #444;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.5);
 }
 
 .sidebar-header {
@@ -38,6 +48,33 @@ canvas {
   position: sticky;
   top: 0;
   z-index: 1001;
+}
+
+.right-header {
+  padding: 20px !important;
+}
+
+.datetime-display {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.digital-clock {
+  font-size: 36px;
+  font-weight: bold;
+  color: #00ff00;
+  text-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.calendar-display {
+  font-size: 14px;
+  color: #aaa;
+  text-align: center;
+  font-weight: 500;
 }
 
 .sidebar-tabs {
@@ -287,5 +324,51 @@ canvas {
   padding: 40px 20px;
   color: #888;
   font-size: 14px;
+}
+
+/* Event Log Styles */
+.event-log-container {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 180px);
+  overflow-y: auto;
+}
+
+.event-log-title {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #00ff00;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 8px;
+}
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-item {
+  background-color: #2a2a2a;
+  border-left: 3px solid #4da6ff;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.event-time {
+  color: #00ff00;
+  font-weight: bold;
+  font-size: 10px;
+  margin-bottom: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+.event-message {
+  color: #ccc;
 }
 
