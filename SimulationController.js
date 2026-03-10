@@ -90,7 +90,9 @@ class SimulationController {
     const firstCustomer = this.pendingRequests.search(() => true);
     
     if (!firstCustomer) return; // no pending requests
-    
+    let bestDriver = null;
+    let bestScore = -Infinity;
+    let currentscore = -Infinity;
     // Get the first available driver that can reach within time
     const driver = this.availableDrivers.search(
       (d) => {
@@ -101,6 +103,28 @@ class SimulationController {
         let frames_to_reach = distance / d.speed;
         let remaining_frames = remaining_ms * 60 / 1000; // assuming 60 FPS
         
+        //distance score = like 100 - distacee, so closer drivers get higher score
+        //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
+        let distanceScore = 100 - distance;
+        let amenityScore = 0;
+        if (Array.isArray(d.amenities)) {
+          const requiredAmenities = firstCustomer.amenities || [];
+          const hasAllRequired = requiredAmenities.every((amenity) => d.amenities.includes(amenity));
+          if (hasAllRequired) {
+            amenityScore = 50;
+          } else {
+            const missingAmenities = requiredAmenities.filter((amenity) => !d.amenities.includes(amenity));
+            amenityScore = -20 * missingAmenities.length;
+          }
+        }
+        currentscore = distanceScore + amenityScore;// add scores
+        if (currentscore > bestScore) {
+          bestScore = currentscore;
+          bestDriver = d;
+        }
+        // go to next driver in the list and repeat, if driver next is false, return highest rated driver
+
+        //if driver next is false, return highest rated driver
         return frames_to_reach < remaining_frames;
       }
     );

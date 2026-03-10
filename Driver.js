@@ -3,6 +3,7 @@ class Driver {
     // Allow passing a p5.Vector, a plain object with x/y, or separate numbers
     this.id = id;
     this.want = int(random(0,4));
+    this.cartier = int(random(1,4));
     this.amenities = null;
     if (locationX instanceof p5.Vector) {
       // copy so external changes don't affect internal state
@@ -32,6 +33,15 @@ class Driver {
     } else if (this.want === 3) {
       this.amenities.push("CHILD_SEAT");
     } // else want === 4 -> nothing, leave amenities array empty
+    if (this.cartier === 1) {
+      this.amenities.push("BASIC");
+    } else if (this.cartier === 2) {
+      this.amenities.push("SILVER");
+    } else if (this.cartier === 3) {
+      this.amenities.push("GOLD");
+    } else if (this.cartier === 4) {
+      this.amenities.push("PLATINUM");
+    }
 
     this.state = null;
     this.status = "AVAILABLE";
