@@ -248,6 +248,12 @@ class UIManager {
           <strong>Passengers:</strong> ${customer.passengers}
         </div>
         <div class="detail-row">
+          <strong>Subscription:</strong> ${customer.subscriptionPlan || 'N/A'}
+        </div>
+        <div class="detail-row">
+          <strong>Amenities Req:</strong> ${customer.amenitiesRequired && customer.amenitiesRequired !== 'NOTHING' ? customer.amenitiesRequired : 'None'}
+        </div>
+        <div class="detail-row">
           <strong>Location:</strong> (${Math.round(customer.location.x)}, ${Math.round(customer.location.y)})
         </div>
         <div class="detail-row">
@@ -287,7 +293,11 @@ class UIManager {
           <strong>Location:</strong> (${Math.round(driver.location.x)}, ${Math.round(driver.location.y)})
         </div>
         <div class="detail-row">
-          <strong>Amenities:</strong> ${driver.amenities.length > 0 ? driver.amenities.join(', ') : 'None'}
+          <strong>Amenities:</strong> ${
+            Array.isArray(driver.amenities)
+              ? (driver.amenities.length > 0 ? driver.amenities.join(', ') : 'None')
+              : (driver.amenities || 'None')
+          }
         </div>
         ${customerInfo}
       </div>

@@ -6,6 +6,36 @@ class Customer {
     this.amenitiesRequired = null;
     this.destination = destination; // {x, y} object
     this.requestTime = millis();
+    this.want = int(random(0,5));
+    if (this.want === 0) {
+      this.amenitiesRequired = "WIFI";
+    }
+      else if (this.want === 1) {
+        this.amenitiesRequired = "PET_FRIENDLY";
+      }
+        else if (this.want === 2) {
+          this.amenitiesRequired = "WHEELCHAIR_ACCESSIBLE";
+        }
+            else if (this.want === 3) {
+              this.amenitiesRequired = "CHILD_SEAT";
+            }
+              else if (this.want === 4) {
+                this.amenitiesRequired = "NOTHING";
+              }
+      this.subtier = int(random(1,4));
+      this.subscriptionPlan = null;
+      if (this.subtier === 1) {
+        this.subscriptionPlan = "BASIC";
+      }
+        else if (this.subtier === 2) {
+          this.subscriptionPlan = "SILVER";
+        }
+            else if (this.subtier === 3) {
+              this.subscriptionPlan = "GOLD";
+            }
+            else if (this.subtier === 4) {
+              this.subscriptionPlan = "PLATINUM";
+            }
     this.status = "PENDING"; // PENDING, MATCHED, EXPIRED
     this.Pickedup = false;
     this.atdestination = false;

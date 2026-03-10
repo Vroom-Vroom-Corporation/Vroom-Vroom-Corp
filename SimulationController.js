@@ -119,13 +119,27 @@ class SimulationController {
   handleRideCompletions() {
     // Check for completed rides and generate revenue
     this.activeMatches.traverse((customer) => {
-      if (customer.status === "DELIVERED") {
+        if (customer.status === "DELIVERED") {
         // Calculate fare based on distance and passengers
-        const distance = this.map.getDistance(customer.location, customer.destination);
+          const distance = this.map.getDistance(customer.location, customer.destination);
+        
         const baseFare = 5.00;
         const distanceRate = 2.50; // $2.50 per unit distance
         const passengerRate = 1.50; // $1.50 per passenger
-        const fare = baseFare + (distance * distanceRate) + (customer.passengers * passengerRate);
+          if (customer.subscriptionPlan === "SILVER") {
+            passengerRate = 2.25;
+            distanceRate = 3.00;
+            baseFare = 7.50;
+          } else if (customer.subscriptionPlan === "GOLD") {
+            passengerRate = 5.00;
+            distanceRate = 5.00;
+            baseFare = 10.00;
+          } else if (customer.subscriptionPlan === "PLATINUM") {
+            passengerRate = 100.75;
+            distanceRate = 50.75;
+            baseFare = 250.00;
+          }
+        const fare = baseFare + (distance/1000 * distanceRate) + (customer.passengers * passengerRate);
         
         // Random ride time between 8-25 minutes
         const rideTime = Math.random() * 17 + 8;

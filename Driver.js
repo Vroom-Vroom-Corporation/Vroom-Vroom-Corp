@@ -2,7 +2,8 @@ class Driver {
   constructor(id, locationX, locationY, capacity = int(random(1, 4)), amenities = []) {
     // Allow passing a p5.Vector, a plain object with x/y, or separate numbers
     this.id = id;
-
+    this.want = int(random(0,4));
+    this.amenities = null;
     if (locationX instanceof p5.Vector) {
       // copy so external changes don't affect internal state
       this.location = locationX.copy();
@@ -18,7 +19,19 @@ class Driver {
     }
 
     this.capacity = capacity;
-    this.amenities = amenities;
+    // start with an array so UI can safely call join() later
+    this.amenities = Array.isArray(amenities) ? [...amenities] : [];
+
+    // randomly assign an amenity requirement based on want
+    if (this.want === 0) {
+      this.amenities.push("WIFI");
+    } else if (this.want === 1) {
+      this.amenities.push("PET_FRIENDLY");
+    } else if (this.want === 2) {
+      this.amenities.push("WHEELCHAIR_ACCESSIBLE");
+    } else if (this.want === 3) {
+      this.amenities.push("CHILD_SEAT");
+    } // else want === 4 -> nothing, leave amenities array empty
 
     this.state = null;
     this.status = "AVAILABLE";
