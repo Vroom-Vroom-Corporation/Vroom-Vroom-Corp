@@ -19,7 +19,16 @@ class TownMap {
   }
 
   drawGrid() {
-    //lol put a image of google earth or smth
+    // draw background map if available
+    if (typeof mapview !== 'undefined' && mapview) {
+      image(mapview, 0, 0, this.width, this.height);
+    } else {
+      // fallback: fill with dark gray
+      noStroke();
+      fill(30);
+      rect(0, 0, this.width, this.height);
+    }
+
     stroke(170);
     for (let x = 0; x < this.width; x += this.gridSize) {
       line(x, 0, x, this.height);
