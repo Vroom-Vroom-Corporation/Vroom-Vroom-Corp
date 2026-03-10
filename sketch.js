@@ -24,7 +24,7 @@ function draw() {
  // car.display();
   simulation.update();
   simulation.display();
-  circle(mouseX, mouseY, 10);
+  //circle(mouseX, mouseY, 10);
 }
 
 function mouseReleased() {

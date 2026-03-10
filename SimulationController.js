@@ -3,7 +3,7 @@ class SimulationController {
     this.map = new TownMap(width, height);
     this.doomsdayclock = new UniversalDeathClock();
     this.timeManager = new TimeManager();
-
+    this.VroomVroomCorp = new Company("Vroom Vroom Corporation");
     
     // STUDENTS MUST INITIALIZE THESE AS LINKED LISTS
     this.availableDrivers = new LinkedList();
@@ -70,6 +70,7 @@ class SimulationController {
     const customer = new Customer("C" + this.customerCounter++, loc, dest);
     this.pendingRequests.insert(customer);
     this.addEvent(customer.id, `New request with ${customer.passengers} passengers from (${Math.round(loc.x)}, ${Math.round(loc.y)}) to (${Math.round(dest.x)}, ${Math.round(dest.y)})`);
+    this.VroomVroomCorp.updateFinancials(10); //change with customer class, maybe based on passengers or distance or smth
   }
 
   updateDrivers() {
@@ -81,6 +82,7 @@ class SimulationController {
   updateCustomers() {
     this.pendingRequests.traverse((customer) => customer.update());
     this.activeMatches.traverse((customer) => customer.update());
+    this.handleRideCompletions();
   }
 
   processMatching() {
@@ -112,6 +114,30 @@ class SimulationController {
       this.pendingRequests.delete((c) => c.id === firstCustomer.id);
       this.activeMatches.insert(firstCustomer);
     }
+  }
+
+  handleRideCompletions() {
+    // Check for completed rides and generate revenue
+    this.activeMatches.traverse((customer) => {
+      if (customer.status === "DELIVERED") {
+        // Calculate fare based on distance and passengers
+        const distance = this.map.getDistance(customer.location, customer.destination);
+        const baseFare = 5.00;
+        const distanceRate = 2.50; // $2.50 per unit distance
+        const passengerRate = 1.50; // $1.50 per passenger
+        const fare = baseFare + (distance * distanceRate) + (customer.passengers * passengerRate);
+        
+        // Random ride time between 8-25 minutes
+        const rideTime = Math.random() * 17 + 8;
+        
+        // Complete the ride
+        this.VroomVroomCorp.completeRide(fare, rideTime);
+        this.addEvent("RIDE", `${customer.id} completed ride - $${fare.toFixed(2)} earned`);
+        
+        // Remove from active matches
+        this.activeMatches.delete((c) => c.id === customer.id);
+      }
+    });
   }
 
   handleExpirations() {//<
@@ -200,6 +226,10 @@ class SimulationController {
       this.uiManager.updateDriverList(allDrivers);
       this.uiManager.updateTimeDisplay(this.timeManager);
       this.uiManager.updateEventLog(this.eventLog);
+      
+      // Update company info
+      this.VroomVroomCorp.setActiveDrivers(allDrivers.length);
+      this.uiManager.updateCompanyInfo(this.VroomVroomCorp.getCompanyData());
     }
   }
 

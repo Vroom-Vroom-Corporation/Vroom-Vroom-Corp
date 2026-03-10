@@ -1,7 +1,7 @@
 class UIManager {
   constructor() {
     this.sidebarOpen = false;
-    this.activeTab = 'customers'; // 'customers' or 'drivers'
+    this.activeTab = 'customers'; // 'customers', 'drivers', or 'company'
     this.initializeLeftSidebar();
     this.initializeRightSidebar();
   }
@@ -26,6 +26,7 @@ class UIManager {
       <div class="sidebar-tabs">
         <button class="tab-btn active" data-tab="customers">Customers</button>
         <button class="tab-btn" data-tab="drivers">Drivers</button>
+        <button class="tab-btn" data-tab="company">Company</button>
       </div>
     `;
     
@@ -52,8 +53,16 @@ class UIManager {
     driverList.setAttribute('data-tab', 'drivers');
     driverList.style.display = 'none';
     
+    // Create company info container
+    const companyInfo = document.createElement('div');
+    companyInfo.id = 'company-info';
+    companyInfo.className = 'item-list company-info';
+    companyInfo.setAttribute('data-tab', 'company');
+    companyInfo.style.display = 'none';
+    
     contentContainer.appendChild(customerList);
     contentContainer.appendChild(driverList);
+    contentContainer.appendChild(companyInfo);
     
     sidebar.appendChild(header);
     sidebar.appendChild(contentContainer);
@@ -322,5 +331,84 @@ class UIManager {
       `;
       eventListElement.appendChild(eventElement);
     }
+  }
+
+  updateCompanyInfo(companyData) {
+    const companyContainer = document.getElementById('company-info');
+    if (!companyContainer) return;
+
+    companyContainer.innerHTML = `
+      <div class="company-header">
+        <div class="company-logo-placeholder">
+          <div class="logo-placeholder">LOGO</div>
+        </div>
+        <h2 class="company-name">Vroom Vroom Corporation</h2>
+      </div>
+      
+      <div class="financial-summary">
+        <h3 class="section-title">Financial Summary</h3>
+        <div class="financial-metrics">
+          <div class="metric-card revenue">
+            <div class="metric-label">Revenue</div>
+            <div class="metric-value">$${companyData.revenue.toLocaleString()}</div>
+          </div>
+          <div class="metric-card expenses">
+            <div class="metric-label">Expenses</div>
+            <div class="metric-value">$${companyData.expenses.toLocaleString()}</div>
+          </div>
+          <div class="metric-card profit ${companyData.profit >= 0 ? 'positive' : 'negative'}">
+            <div class="metric-label">Profit</div>
+            <div class="metric-value">$${companyData.profit.toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="monthly-report">
+        <h3 class="section-title">Monthly Report</h3>
+        <div class="report-content">
+          <div class="report-item">
+            <span class="report-label">Total Rides:</span>
+            <span class="report-value">${companyData.totalRides}</span>
+          </div>
+          <div class="report-item">
+            <span class="report-label">Active Drivers:</span>
+            <span class="report-value">${companyData.activeDrivers}</span>
+          </div>
+          <div class="report-item">
+            <span class="report-label">Customer Satisfaction:</span>
+            <span class="report-value">${companyData.satisfaction}%</span>
+          </div>
+          <div class="report-item">
+            <span class="report-label">Avg. Ride Time:</span>
+            <span class="report-value">${companyData.avgRideTime} min</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="performance-graph">
+        <h3 class="section-title">Revenue Trend</h3>
+        <div class="graph-placeholder">
+          <div class="graph-bars">
+            ${this.generateGraphBars(companyData.revenueHistory)}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  generateGraphBars(revenueHistory) {
+    if (!revenueHistory || revenueHistory.length === 0) {
+      return '<div class="no-data">No data available</div>';
+    }
+
+    const maxRevenue = Math.max(...revenueHistory);
+    return revenueHistory.map((revenue, index) => {
+      const height = maxRevenue > 0 ? (revenue / maxRevenue) * 100 : 0;
+      return `
+        <div class="graph-bar" style="height: ${height}%">
+          <div class="bar-value">$${revenue.toLocaleString()}</div>
+        </div>
+      `;
+    }).join('');
   }
 }

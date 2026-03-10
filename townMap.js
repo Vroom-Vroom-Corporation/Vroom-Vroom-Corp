@@ -21,6 +21,7 @@ class TownMap {
   drawGrid() {
     // draw background map if available
     if (typeof mapview !== 'undefined' && mapview) {
+      tint(255, 150); // optional: add some transparency to the map
       image(mapview, 0, 0, this.width, this.height);
     } else {
       // fallback: fill with dark gray

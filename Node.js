@@ -39,10 +39,82 @@ class UniversalDeathClock {
   }
 }
 
-// class Eventinst {
-//   constructor(type, data, time) {
-//     this.type = type;
-//     this.data = data;
-//     this.time = time;
-//   }
-// }
+class Company{
+  constructor(name) {
+    this.name = name;
+    this.revenue = 0;
+    this.expenses = 0;
+    this.profit = 0;
+    this.totalRides = 0;
+    this.activeDrivers = 0;
+    this.satisfaction = 95; // Base satisfaction percentage
+    this.avgRideTime = 12; // Average ride time in minutes
+    this.revenueHistory = []; // Track revenue over time for graph
+    this.lastRevenueUpdate = 0;
+  }
+
+  updateFinancials(amount) {
+    this.revenue += amount;
+    this.profit = this.revenue - this.expenses;
+    
+    // Track revenue history for graph (every $1000 increment)
+    const revenueIncrement = Math.floor(this.revenue / 1000);
+    if (revenueIncrement > this.lastRevenueUpdate) {
+      this.revenueHistory.push(amount);
+      this.lastRevenueUpdate = revenueIncrement;
+      
+      // Keep only last 10 data points for the graph
+      if (this.revenueHistory.length > 10) {
+        this.revenueHistory.shift();
+      }
+    }
+  }
+
+  incurExpense(amount) {
+    this.expenses += amount;
+    this.profit = this.revenue - this.expenses;
+  }
+
+  completeRide(fare, rideTime) {
+    this.totalRides++;
+    this.updateFinancials(fare);
+    
+    // Update average ride time (weighted average)
+    this.avgRideTime = ((this.avgRideTime * (this.totalRides - 1)) + rideTime) / this.totalRides;
+    
+    // Adjust satisfaction based on ride time (faster rides = higher satisfaction)
+    if (rideTime < 10) {
+      this.satisfaction = Math.min(100, this.satisfaction + 0.1);
+    } else if (rideTime > 20) {
+      this.satisfaction = Math.max(80, this.satisfaction - 0.1);
+    }
+  }
+
+  setActiveDrivers(count) {
+    this.activeDrivers = count;
+  }
+
+  getCompanyData() {
+    return {
+      revenue: Math.round(this.revenue),
+      expenses: Math.round(this.expenses),
+      profit: Math.round(this.profit),
+      totalRides: this.totalRides,
+      activeDrivers: this.activeDrivers,
+      satisfaction: Math.round(this.satisfaction),
+      avgRideTime: Math.round(this.avgRideTime),
+      revenueHistory: this.revenueHistory.slice() // Copy the array
+    };
+  }
+
+  monthlyReport() {
+    console.log(`Monthly Report for ${this.name}:`);
+    console.log(`Revenue: $${this.revenue.toFixed(2)}`);
+    console.log(`Expenses: $${this.expenses.toFixed(2)}`);
+    console.log(`Profit: $${this.profit.toFixed(2)}`);
+    console.log(`Total Rides: ${this.totalRides}`);
+    console.log(`Active Drivers: ${this.activeDrivers}`);
+    console.log(`Customer Satisfaction: ${this.satisfaction.toFixed(1)}%`);
+  }
+
+}
