@@ -8,14 +8,15 @@ class SimulationController {
     this.availableDrivers = new LinkedList();
     this.pendingRequests = new LinkedList();
     this.activeMatches = new LinkedList();
-    this.expiredRequests = null;
-    this.eventLog = null; //event log might incude active and expired requests, or we can have separate logs for each
+    this.expiredRequests = new LinkedList();
+    this.eventLog = new LinkedList(); //event log might incude active and expired requests, or we can have separate logs for each
 
     this.spawnInterval = 180;
     this.frameCounter = 0;
 
     this.driverCounter = 1;
     this.customerCounter = 1;
+    this.uiManager = new UIManager();
     //temp 3 drivers
           this.spawnRandomDriver();
            this.spawnRandomDriver();
@@ -36,6 +37,9 @@ class SimulationController {
 
    this.processMatching();      // STUDENTS IMPLEMENT
     this.handleExpirations();    // STUDENTS IMPLEMENT
+    
+    // Update UI sidebar with active customers
+    this.updateUI();
   }
 
   display() {
@@ -158,5 +162,36 @@ class SimulationController {
     textAlign(LEFT);
     text("Vroom Vroom", 20, 25);
     //ui here, maybe show number of pending requests, available drivers, etc.
+  }
+
+  updateUI() {
+    const pendingCustomers = [];
+    const matchedCustomers = [];
+    const allDrivers = [];
+
+    // Collect pending customers
+    this.pendingRequests.traverse((customer) => {
+      if (customer.status === "PENDING") {
+        pendingCustomers.push(customer);
+      }
+    });
+
+    // Collect matched customers
+    this.activeMatches.traverse((customer) => {
+      if (customer.status === "MATCHED") {
+        matchedCustomers.push(customer);
+      }
+    });
+
+    // Collect all drivers
+    this.availableDrivers.traverse((driver) => {
+      allDrivers.push(driver);
+    });
+
+    // Update the UI manager
+    if (this.uiManager) {
+      this.uiManager.updateCustomerList(pendingCustomers, matchedCustomers, this);
+      this.uiManager.updateDriverList(allDrivers);
+    }
   }
 }
