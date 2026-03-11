@@ -6,6 +6,7 @@ class Customer {
     this.amenitiesRequired = null;
     this.destination = destination; // {x, y} object
     this.requestTime = millis();
+    this.driversatsfaction = 0;
     this.want = int(random(0,5));
     if (this.want === 0) {
       this.amenitiesRequired = "WIFI";
@@ -43,8 +44,15 @@ class Customer {
     // face image, subscrip plan ap ayp check canva
   }
 
-  aknowledgeMatch() {
+  aknowledgeMatch(driver) {
     this.status = "MATCHED";
+    //if driver has the amenity required, increase satisfaction, otherwise decrease satisfaction
+    if (driver.amenities.includes(this.amenitiesRequired) || this.amenitiesRequired === "NOTHING") {
+      this.driversatsfaction += 5; // increase satisfaction by 5 for a match
+    } else {
+      this.driversatsfaction -= 10; // decrease satisfaction by 10 for a mismatch
+    }
+    //driver.ame
   }
 
   update() {  

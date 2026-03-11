@@ -139,7 +139,7 @@ class SimulationController {
     // If both exist, assign the customer as the driver's target
     if (driver && firstCustomer) {
       driver.assignRide(firstCustomer, 300);
-      firstCustomer.aknowledgeMatch();
+      firstCustomer.aknowledgeMatch(driver);
       this.addEvent("MATCH", `${firstCustomer.id} matched with ${driver.id}`);
       // Move the customer from pendingRequests to activeMatches
       this.pendingRequests.delete((c) => c.id === firstCustomer.id);
@@ -153,7 +153,7 @@ class SimulationController {
         if (customer.status === "DELIVERED") {
         // Calculate fare based on distance and passengers
           const distance = this.map.getDistance(customer.location, customer.destination);
-        
+        let tips=0;
         let baseFare = 5.00;
         let distanceRate = 2.50; // $2.50 per unit distance
         let passengerRate = 1.50; // $1.50 per passenger
@@ -170,7 +170,9 @@ class SimulationController {
             distanceRate = 50.75;
             baseFare = 250.00;
           }
-        const fare = baseFare + (distance/1000 * distanceRate) + (customer.passengers * passengerRate);
+            tips = customer.driversatsfaction; // tips based on driver satisfaction, max 10% of fare
+        const fare = baseFare + (distance/1000 * distanceRate) + (customer.passengers * passengerRate) + tips;
+        // increased earnings amenities
         
         // Random ride time between 8-25 minutes
         const rideTime = Math.random() * 17 + 8;
@@ -178,7 +180,8 @@ class SimulationController {
         // Complete the ride
         this.VroomVroomCorp.completeRide(fare, rideTime);
         this.addEvent("RIDE", `${customer.id} completed ride - $${fare.toFixed(2)} earned`);
-        
+        console.log(`${customer.id} completed ride - $${fare.toFixed(2)} earned`);
+        console.log(tips);
         // Remove from active matches
         this.activeMatches.delete((c) => c.id === customer.id);
       }

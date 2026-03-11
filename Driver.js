@@ -166,6 +166,7 @@ moveManhattan() {
       let ty = this.target.location.y;
 
       // color matches driver state
+      strokeWeight(5);
       if (this.state === "EN_ROUTE") {
         stroke(255, 165, 0); // orange
       } else if (this.state === "TO_DESTINATION") {
@@ -175,9 +176,10 @@ moveManhattan() {
       } else {
         stroke(0);
       }
-      strokeWeight(1);
+     
       line(this.location.x, this.location.y, tx, this.location.y);
       line(tx, this.location.y, tx, ty);
+       strokeWeight(1);
     }
 
     // draw the driver itself
