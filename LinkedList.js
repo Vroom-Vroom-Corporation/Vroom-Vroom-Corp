@@ -17,7 +17,7 @@ class LinkedList {
       current.next = node;
     }
     this.size++;
-    console.log(`Inserted: ${data}`);
+   // console.log(`Inserted: ${data}`);
   }
 
   
@@ -30,10 +30,10 @@ class LinkedList {
   }
 
 
-  search(predicate) {
+  search(huntingtarget) {
     let current = this.head;
     while (current !== null) {
-      if (predicate(current.data)) {
+      if (huntingtarget(current.data)) {
         return current.data;
       }
       current = current.next;

@@ -22,9 +22,10 @@ class SimulationController {
     this.uiManager = new UIManager();
     this.addEvent("SYSTEM", "Simulation started");
     //temp 3 drivers
+    for (let i = 0; i < 10; i++) {
           this.spawnRandomDriver();
-           this.spawnRandomDriver();
-            this.spawnRandomDriver();
+    }
+       
             
   }
 
@@ -102,7 +103,7 @@ class SimulationController {
         let remaining_ms = firstCustomer.expireTime - millis();
         let frames_to_reach = distance / d.speed;
         let remaining_frames = remaining_ms * 60 / 1000; // assuming 60 FPS
-        
+        console.log(`Evaluating driver ${d.id}: distance=${distance}, frames_to_reach=${frames_to_reach.toFixed(2)}, remaining_frames=${remaining_frames.toFixed(2)}`);
         //distance score = like 100 - distacee, so closer drivers get higher score
         //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
         let distanceScore = 100 - distance;
@@ -122,10 +123,16 @@ class SimulationController {
           bestScore = currentscore;
           bestDriver = d;
         }
+        console.log(bestDriver.id, "score:", bestScore, "distanceScore:", distanceScore, "amenityScore:", amenityScore);
         // go to next driver in the list and repeat, if driver next is false, return highest rated driver
+          if (!d.next) {
+           console.log(bestDriver.id, "final best score:", bestScore);
+            return true; // stop searching, we will return bestDriver after traversal
 
+          } else {            return false; // keep searching for better driver
+          }
         //if driver next is false, return highest rated driver
-        return frames_to_reach < remaining_frames;
+        //return frames_to_reach < remaining_frames;
       }
     );
     
@@ -147,9 +154,9 @@ class SimulationController {
         // Calculate fare based on distance and passengers
           const distance = this.map.getDistance(customer.location, customer.destination);
         
-        const baseFare = 5.00;
-        const distanceRate = 2.50; // $2.50 per unit distance
-        const passengerRate = 1.50; // $1.50 per passenger
+        let baseFare = 5.00;
+        let distanceRate = 2.50; // $2.50 per unit distance
+        let passengerRate = 1.50; // $1.50 per passenger
           if (customer.subscriptionPlan === "SILVER") {
             passengerRate = 2.25;
             distanceRate = 3.00;

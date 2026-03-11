@@ -48,7 +48,7 @@ class Customer {
   }
 
   update() {  
-    console.log("deezx");
+    //console.log("deezx");
     if (millis() > this.expireTime) {
       if(this.status === "PENDING"||this.status === "MATCHED") {
       this.status = "EXPIRED";

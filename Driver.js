@@ -2,9 +2,10 @@ class Driver {
   constructor(id, locationX, locationY, capacity = int(random(1, 4)), amenities = []) {
     // Allow passing a p5.Vector, a plain object with x/y, or separate numbers
     this.id = id;
-    this.want = int(random(0,4));
+
+    this.speed = int(random(1, 4)); // unique speed for each driver
     this.cartier = int(random(1,4));
-    this.amenities = null;
+    // this.amenities = null;
     if (locationX instanceof p5.Vector) {
       // copy so external changes don't affect internal state
       this.location = locationX.copy();
@@ -14,33 +15,44 @@ class Driver {
       typeof locationX.y === "number"
     ) {
       // plain object {x, y} from TownMap.getRandomLocation
-      this.location = createVector(locationX.x, locationX.y);
+      this.location = createVector(locationX.x, locationY.y);
     } else {
       this.location = createVector(locationX, locationY);
     }
+
+    // keep last location to draw Manhattan steps
+    this.prevLocation = this.location.copy();
 
     this.capacity = capacity;
     // start with an array so UI can safely call join() later
     this.amenities = Array.isArray(amenities) ? [...amenities] : [];
 
-    // randomly assign an amenity requirement based on want
-    if (this.want === 0) {
-      this.amenities.push("WIFI");
-    } else if (this.want === 1) {
-      this.amenities.push("PET_FRIENDLY");
-    } else if (this.want === 2) {
-      this.amenities.push("WHEELCHAIR_ACCESSIBLE");
-    } else if (this.want === 3) {
-      this.amenities.push("CHILD_SEAT");
-    } // else want === 4 -> nothing, leave amenities array empty
+   // else want === 4 -> nothing, leave amenities array empty
     if (this.cartier === 1) {
       this.amenities.push("BASIC");
+    this.want = int(random(0,4));
+      this.assignamenities(this.want);
     } else if (this.cartier === 2) {
       this.amenities.push("SILVER");
+      this.speed += 1; // Silver drivers are faster
+      for (let i = 0; i < 2; i++) {
+        this.want = int(random(0,4));
+        this.assignamenities(this.want);
+      }
     } else if (this.cartier === 3) {
+      this.speed += 2; // Gold drivers are even faster
       this.amenities.push("GOLD");
+      for (let i = 0; i < 3; i++) {
+        this.want = int(random(0,4));
+        this.assignamenities(this.want);
+      }
     } else if (this.cartier === 4) {
+      this.speed += 3; // Platinum drivers are the fastest
       this.amenities.push("PLATINUM");
+        this.amenities.push("WIFI");
+            this.amenities.push("PET_FRIENDLY");
+               this.amenities.push("WHEELCHAIR_ACCESSIBLE");
+                     this.amenities.push("CHILD_SEAT");
     }
 
     this.state = null;
@@ -48,9 +60,19 @@ class Driver {
     this.currentRide = null;
     this.busyTimer = 0;
         
-    this.speed = int(random(1, 4)); // unique speed for each driver
   }
-
+  assignamenities(request) {
+     // randomly assign an amenity requirement based on want
+    if (request === 0) {
+      this.amenities.push("WIFI");
+    } else if (request === 1) {
+      this.amenities.push("PET_FRIENDLY");
+    } else if (request === 2) {
+      this.amenities.push("WHEELCHAIR_ACCESSIBLE");
+    } else if (request === 3) {
+      this.amenities.push("CHILD_SEAT");
+    } 
+  }
   assignRide(request, duration) {
     this.status = "EN_ROUTE";
     this.currentRide = request;
@@ -60,22 +82,15 @@ class Driver {
   }
 
   update() {
-    // if (this.status === "EN_ROUTE") {
-    //   this.busyTimer--;
-    //   if (this.busyTimer <= 0) {
-    //     this.status = "AVAILABLE";
-    //     this.currentRide = null;
-    //     this.target = null;
-    //     this.state = null;
-    //   }
-    // }
-
     // Only proceed with movement if we have a target and a passenger
     if (!this.target || !this.currentRide) return;
-    
+
+    // remember where we started this frame for drawing the step
+    this.prevLocation = this.location.copy();
     this.moveManhattan();
+
     let passenger = this.currentRide;
-    console.log(passenger.status, passenger.Pickedup, passenger.atdestination);
+   // console.log(passenger.status, passenger.Pickedup, passenger.atdestination);
     if (passenger.status === "MATCHED") {
       if (this.atTarget()) {
         passenger.Pickedup = true;
@@ -109,9 +124,11 @@ moveManhattan() {
 
     if(abs(targetX - this.location.x) < this.speed) {
       this.location.x = targetX;
+
     }
     if(abs(targetY - this.location.y) < this.speed) {
       this.location.y = targetY;
+
     }
 
     // Move horizontally first
@@ -137,11 +154,35 @@ moveManhattan() {
   display() {
       fill(
       this.state === "IDLE"
-        ? "grey"
+        ? "white"
         : this.state === "EN_ROUTE"
         ? "orange"
         : "blue"
-    )
+    );
+
+    // draw the planned Manhattan path (like a GPS) to the current target
+    if (this.target) {
+      let tx = this.target.location.x;
+      let ty = this.target.location.y;
+
+      // color matches driver state
+      if (this.state === "EN_ROUTE") {
+        stroke(255, 165, 0); // orange
+      } else if (this.state === "TO_DESTINATION") {
+        stroke(0, 0, 255); // blue
+      } else if (this.state === "IDLE") {
+        stroke(150); // gray when not moving
+      } else {
+        stroke(0);
+      }
+      strokeWeight(1);
+      line(this.location.x, this.location.y, tx, this.location.y);
+      line(tx, this.location.y, tx, ty);
+    }
+
+    // draw the driver itself
+    stroke(0);
+    strokeWeight(1);
     ellipse(this.location.x, this.location.y, 22);
     fill(255);
     textSize(10);
