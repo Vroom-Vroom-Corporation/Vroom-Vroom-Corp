@@ -41,16 +41,18 @@ class Customer {
     this.Pickedup = false;
     this.atdestination = false;
     this.expireTime = this.requestTime + int(random(10000,30000)); // expires after 20 seconds
+    this.assignedDriver = null; // will store driver object when matched
     // face image, subscrip plan ap ayp check canva
   }
 
   aknowledgeMatch(driver) {
     this.status = "MATCHED";
+    this.assignedDriver = driver; // remember which driver was assigned
     //if driver has the amenity required, increase satisfaction, otherwise decrease satisfaction
     if (driver.amenities.includes(this.amenitiesRequired) || this.amenitiesRequired === "NOTHING") {
       this.driversatsfaction += 5; // increase satisfaction by 5 for a match
     } else {
-      this.driversatsfaction -= 10; // decrease satisfaction by 10 for a mismatch
+      this.driversatsfaction -= 5; // decrease satisfaction by 5 for a mismatch
     }
     //driver.ame
   }

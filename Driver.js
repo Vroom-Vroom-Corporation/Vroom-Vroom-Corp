@@ -2,7 +2,10 @@ class Driver {
   constructor(id, locationX, locationY, capacity = int(random(1, 4)), amenities = []) {
     // Allow passing a p5.Vector, a plain object with x/y, or separate numbers
     this.id = id;
-
+    this.totalrating = 0;
+    this.numRatings = 0;
+    this.avgrating = 0;
+    this.lastRating = 0; // most recent rating
     this.speed = int(random(1, 4)); // unique speed for each driver
     this.cartier = int(random(1,4));
     // this.amenities = null;

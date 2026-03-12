@@ -297,8 +297,12 @@ class UIManager {
             Array.isArray(driver.amenities)
               ? (driver.amenities.length > 0 ? driver.amenities.join(', ') : 'None')
               : (driver.amenities || 'None')
-          }
+          }        <div class="detail-row">
+          <strong>Avg Rating:</strong> ${isNaN(driver.avgrating) ? 'N/A' : driver.avgrating.toFixed(2)}
         </div>
+        <div class="detail-row">
+          <strong>Last Rating:</strong> ${isNaN(driver.lastRating) ? 'N/A' : driver.lastRating.toFixed(2)}
+        </div>        </div>
         ${customerInfo}
       </div>
     `;
@@ -385,12 +389,12 @@ class UIManager {
             <span class="report-value">${companyData.activeDrivers}</span>
           </div>
           <div class="report-item">
-            <span class="report-label">Customer Satisfaction:</span>
-            <span class="report-value">${companyData.satisfaction}%</span>
+            <span class="report-label">Avg. Rating:</span>
+            <span class="report-value">${isNaN(companyData.averageRating) ? 'N/A' : companyData.averageRating.toFixed(2)}</span>
           </div>
           <div class="report-item">
-            <span class="report-label">Avg. Ride Time:</span>
-            <span class="report-value">${companyData.avgRideTime} min</span>
+            <span class="report-label">Last Rating:</span>
+            <span class="report-value">${isNaN(companyData.lastRating) ? 'N/A' : companyData.lastRating.toFixed(2)}</span>
           </div>
         </div>
       </div>

@@ -14,7 +14,6 @@ class SimulationController {
     this.eventLogSize = 0;
     this.maxEventLogSize = 50;
 
-    this.spawnInterval = 180;
     this.frameCounter = 0;
 
     this.driverCounter = 1;
@@ -31,9 +30,11 @@ class SimulationController {
 
   update() {
     this.frameCounter++;
+    
+    // Calculate dynamic spawn interval based on current time
+    const spawnInterval = this.calculateSpawnInterval();
 
-    if (this.frameCounter % this.spawnInterval === 0) { //temp spawn logic
-
+    if (this.frameCounter % spawnInterval === 0) {
       this.spawnRandomCustomer();
     }
 
@@ -72,6 +73,29 @@ class SimulationController {
     this.pendingRequests.insert(customer);
     this.addEvent(customer.id, `New request with ${customer.passengers} passengers from (${Math.round(loc.x)}, ${Math.round(loc.y)}) to (${Math.round(dest.x)}, ${Math.round(dest.y)})`);
     this.VroomVroomCorp.updateFinancials(10); //change with customer class, maybe based on passengers or distance or smth
+  }
+
+  // Calculate spawn interval based on current simulation time
+  // Returns shorter intervals during peak hours for increased spawning rates
+  calculateSpawnInterval() {
+    const hour = this.timeManager.getHour();
+    const isWeekday = this.timeManager.isWeekday();
+
+    // Peak hours: 7-9 AM (7:00-8:59) and 4-6 PM (16:00-17:59)
+    const isMorningPeak = hour >= 7 && hour < 9;
+    const isEveningPeak = hour >= 16 && hour < 18;
+
+    // base interval depends on peak vs off-peak
+    const baseInterval = (isWeekday && (isMorningPeak || isEveningPeak)) ? 60 : 180;
+
+    // adjust interval based on company average rating
+    // higher rating -> more frequent spawns, lower rating -> slower spawns
+    const rating = this.VroomVroomCorp.avgrating || 1; // avoid division by zero
+    const ratingFactor = rating / 5; // normalize to 0..1 (assuming 5 is max rating)
+
+    // combine base interval with rating factor; ensure it never goes below a minimum
+    const interval = baseInterval / (1 + ratingFactor);
+    return Math.max(20, Math.round(interval));
   }
 
   updateDrivers() {
@@ -153,7 +177,8 @@ class SimulationController {
         if (customer.status === "DELIVERED") {
         // Calculate fare based on distance and passengers
           const distance = this.map.getDistance(customer.location, customer.destination);
-        let tips=0;
+        let score =0;
+          let tips=0;
         let baseFare = 5.00;
         let distanceRate = 2.50; // $2.50 per unit distance
         let passengerRate = 1.50; // $1.50 per passenger
@@ -161,15 +186,19 @@ class SimulationController {
             passengerRate = 2.25;
             distanceRate = 3.00;
             baseFare = 7.50;
+            score +=1;
           } else if (customer.subscriptionPlan === "GOLD") {
             passengerRate = 5.00;
             distanceRate = 5.00;
             baseFare = 10.00;
+            score +=3;
           } else if (customer.subscriptionPlan === "PLATINUM") {
             passengerRate = 100.75;
             distanceRate = 50.75;
             baseFare = 250.00;
+            score +=5;
           }
+          score += customer.driversatsfaction/5; // increase score based on driver satisfaction, max 5 points
             tips = customer.driversatsfaction; // tips based on driver satisfaction, max 10% of fare
         const fare = baseFare + (distance/1000 * distanceRate) + (customer.passengers * passengerRate) + tips;
         // increased earnings amenities
@@ -182,8 +211,26 @@ class SimulationController {
         this.addEvent("RIDE", `${customer.id} completed ride - $${fare.toFixed(2)} earned`);
         console.log(`${customer.id} completed ride - $${fare.toFixed(2)} earned`);
         console.log(tips);
+          console.log("this ride is:"+score);
         // Remove from active matches
         this.activeMatches.delete((c) => c.id === customer.id);
+        // Update driver rating based on score (use assignedDriver reference)
+        if (customer.assignedDriver) {
+          const driver = this.availableDrivers.search((d) => d.id === customer.assignedDriver.id);
+          if (driver) {
+            driver.numRatings++;
+            driver.totalrating += score;
+            driver.avgrating = driver.totalrating / driver.numRatings;
+            driver.lastRating = score; // record latest rating
+            // update company-level averages as well
+            this.VroomVroomCorp.totalrating += score;
+            this.VroomVroomCorp.numRatings++;
+            this.VroomVroomCorp.avgrating = this.VroomVroomCorp.totalrating / this.VroomVroomCorp.numRatings;
+            this.VroomVroomCorp.lastRating = score; // update company last rating
+            console.log("driver rating updated:", driver.avgrating);
+            console.log("company average rating updated:", this.VroomVroomCorp.avgrating);
+          }
+        }
       }
     });
   }

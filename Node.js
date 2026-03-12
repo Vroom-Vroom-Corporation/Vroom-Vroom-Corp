@@ -39,6 +39,12 @@ class UniversalDeathClock {
   }
 }
 
+// class Rating {
+//   constructor(score) {
+//     this.score = score;
+//   }
+// }
+
 class Company{
   constructor(name) {
     this.name = name;
@@ -51,6 +57,13 @@ class Company{
     this.avgRideTime = 12; // Average ride time in minutes
     this.revenueHistory = []; // Track revenue over time for graph
     this.lastRevenueUpdate = 0;
+    this.avgrating = 1;
+    this.lastRating = 0; // store the most recent rating received
+    this.totalrating = 1;
+    this.numRatings = 1;
+    this.avgrating = 1;
+    // this.ratinghistory = new LinkedList();
+
   }
 
   updateFinancials(amount) {
@@ -101,8 +114,12 @@ class Company{
       profit: Math.round(this.profit),
       totalRides: this.totalRides,
       activeDrivers: this.activeDrivers,
+      // keep the old values but UI will drop them
       satisfaction: Math.round(this.satisfaction),
       avgRideTime: Math.round(this.avgRideTime),
+      // new rating fields
+      averageRating: this.avgrating,
+      lastRating: this.lastRating,
       revenueHistory: this.revenueHistory.slice() // Copy the array
     };
   }

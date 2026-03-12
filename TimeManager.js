@@ -42,4 +42,22 @@ class TimeManager {
   getFormattedDateTime() {
     return `${this.getDateString()} ${this.getTimeString()}`;
   }
+
+  // Get day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+  getDayOfWeek() {
+    const date = this.getCurrentDateTime();
+    return date.getDay();
+  }
+
+  // Get current hour (0-23)
+  getHour() {
+    const date = this.getCurrentDateTime();
+    return date.getHours();
+  }
+
+  // Check if current time is a weekday (Monday-Friday)
+  isWeekday() {
+    const day = this.getDayOfWeek();
+    return day >= 1 && day <= 5; // 1 = Monday, 5 = Friday
+  }
 }
