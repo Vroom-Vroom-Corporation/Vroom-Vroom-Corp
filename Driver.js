@@ -6,8 +6,8 @@ class Driver {
     this.numRatings = 0;
     this.avgrating = 0;
     this.lastRating = 0; // most recent rating
-    this.speed = int(random(1, 4)); // unique speed for each driver
-    this.cartier = int(random(1,4));
+    this.speed = int(random(1, 5)); // unique speed for each driver
+    this.cartier = int(random(1, 5));
     // this.amenities = null;
     if (locationX instanceof p5.Vector) {
       // copy so external changes don't affect internal state
