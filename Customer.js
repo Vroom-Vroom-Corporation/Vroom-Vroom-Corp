@@ -7,6 +7,7 @@ class Customer {
     this.destination = destination; // {x, y} object
     this.requestTime = millis();
     this.driversatsfaction = 0;
+
     this.want = int(random(0,5));
     if (this.want === 0) {
       this.amenitiesRequired = "WIFI";
@@ -73,6 +74,7 @@ class Customer {
     fill(100,100,255); //blue
     rectMode(CENTER);
     rect(this.location.x, this.location.y, 18, 18);
+    
         fill(255);
     textSize(10);
     textAlign(CENTER);

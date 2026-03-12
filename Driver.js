@@ -190,6 +190,15 @@ moveManhattan() {
     strokeWeight(1);
     ellipse(this.location.x, this.location.y, 22);
     fill(255);
+    if (this.cartier === 1) {
+      fill(200);
+    } else if (this.cartier === 2) {
+      fill(168, 168, 168); // Silver
+    } else if (this.cartier === 3) {
+      fill(255, 220, 92); // Gold
+    } else if (this.cartier === 4) {
+      fill(168, 190, 255); // Platinum
+    }
     textSize(10);
     textAlign(CENTER);
     text(this.id, this.location.x, this.location.y - 15);
