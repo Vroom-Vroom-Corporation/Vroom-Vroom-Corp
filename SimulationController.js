@@ -42,7 +42,7 @@ class SimulationController {
     this.updateCustomers();
 
    this.processMatching();      // STUDENTS IMPLEMENT
-    this.handleExpirations();    // STUDENTS IMPLEMENT
+   // this.handleExpirations();    // STUDENTS IMPLEMENT
     
     // Update UI sidebar with active customers
     this.updateUI();
@@ -113,7 +113,7 @@ class SimulationController {
   processMatching() {
     // Get the first pending customer
     const firstCustomer = this.pendingRequests.search(() => true);
-    
+    //prioritize hier teir cousmuers
     if (!firstCustomer) return; // no pending requests
     let bestDriver = null;
     let bestScore = -Infinity;
@@ -179,6 +179,8 @@ class SimulationController {
           const distance = this.map.getDistance(customer.location, customer.destination);
         let score =0;
           let tips=0;
+
+          //fare for basic and poor customers
         let baseFare = 5.00;
         let distanceRate = 2.50; // $2.50 per unit distance
         let passengerRate = 1.50; // $1.50 per passenger
@@ -235,16 +237,7 @@ class SimulationController {
     });
   }
 
-  handleExpirations() {//<
-    /*
-      STUDENTS IMPLEMENT:
 
-      - If request older than time window
-      - Remove from pendingRequests
-      - Add to expiredRequests
-      - Log event
-    */
-  }
 
   renderDrivers() {
     // walk the availableDrivers linked list and call display() on each
