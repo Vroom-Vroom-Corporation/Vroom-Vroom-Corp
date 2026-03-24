@@ -297,12 +297,17 @@ class UIManager {
             Array.isArray(driver.amenities)
               ? (driver.amenities.length > 0 ? driver.amenities.join(', ') : 'None')
               : (driver.amenities || 'None')
-          }        <div class="detail-row">
+          }
+        </div>
+        <div class="detail-row">
+          <strong>Total Rides:</strong> ${driver.totalrides || 0}
+        </div>
+        <div class="detail-row">
           <strong>Avg Rating:</strong> ${isNaN(driver.avgrating) ? 'N/A' : driver.avgrating.toFixed(2)}
         </div>
         <div class="detail-row">
           <strong>Last Rating:</strong> ${isNaN(driver.lastRating) ? 'N/A' : driver.lastRating.toFixed(2)}
-        </div>        </div>
+        </div>
         ${customerInfo}
       </div>
     `;

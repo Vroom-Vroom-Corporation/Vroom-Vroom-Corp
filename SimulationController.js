@@ -18,6 +18,7 @@ class SimulationController {
 
     this.driverCounter = 1;
     this.customerCounter = 1;
+    this.lastMonthlyHiringTime = this.timeManager.getSimulationTime();
     this.uiManager = new UIManager();
     this.addEvent("SYSTEM", "Simulation started");
     //temp 3 drivers
@@ -30,7 +31,7 @@ class SimulationController {
 
   update() {
     this.frameCounter++;
-    
+    this.MassLayoffs();
     // Calculate dynamic spawn interval based on current time
     const spawnInterval = this.calculateSpawnInterval();
 
@@ -46,6 +47,17 @@ class SimulationController {
     
     // Update UI sidebar with active customers
     this.updateUI();
+
+    // Trigger monthly hiring at fixed simulation intervals.
+    const currentSimTime = this.timeManager.getSimulationTime();
+    const monthMs = 30 * 24 * 60 * 60 * 1000;
+    if (currentSimTime - this.lastMonthlyHiringTime >= monthMs) {
+      this.monthlyHiring();
+      // Keep the next cycle aligned to 30 days. If we are far past one or more cycles, catch up.
+      const cyclesPassed = Math.floor((currentSimTime - this.lastMonthlyHiringTime) / monthMs);
+      this.lastMonthlyHiringTime += cyclesPassed * monthMs;
+    }
+
   }
 
   display() {
@@ -54,6 +66,49 @@ class SimulationController {
     this.renderCustomers();
     this.renderHUD();
   }
+  //hire and fire drivers at the end of each month based on profit and satisfaction
+  MassLayoffs() {
+    this.availableDrivers.traverse((driver) => {
+      if (driver) {
+    //fire if negative rating after 10 rides
+    if (driver.avgrating < 2 && driver.totalrides >= 10) {
+      this.availableDrivers.delete((d) => d.id === driver.id);
+      this.addEvent(driver.id, "Fired due to low rating");
+    }
+    //fire if under average after 20
+    if (driver.avgrating < this.VroomVroomCorp.avgrating && driver.totalrides >= 20) {
+      this.availableDrivers.delete((d) => d.id === driver.id);
+      this.addEvent(driver.id, "Fired due to below average rating");
+    }
+    //Fire if inactive for a week
+    if (driver.status === "INACTIVE") {
+      this.availableDrivers.delete((d) => d.id === driver.id);
+      this.addEvent(driver.id, "Fired due to inactivity");
+    }
+      }
+    });
+  }
+
+  monthlyHiring() {
+    //every month, hire the avgrating # of drivers (rounded down) remove cost of hiring from earnings, add to expenses, then add new drivers to available drivers linked list
+    const driversToHire = Math.floor(this.VroomVroomCorp.avgrating);
+    for (let i = 0; i < driversToHire; i++) {
+      const d = this.spawnRandomDriver();
+      //basic 100. silver 500. gold 1000. platinum 5000.
+
+      let hiringCost = 100; // this can be adjusted based on driver quality or market conditions
+      if (d.cartier === 1) {
+        hiringCost = 100;
+      } else if (d.cartier === 2) {
+        hiringCost = 500;
+      } else if (d.cartier === 3) {
+        hiringCost = 1000;
+      } else if (d.cartier === 4) {
+        hiringCost = 5000;
+      }
+      this.VroomVroomCorp.incurExpense(hiringCost); // cost of hiring a driver
+    }
+  }
 
   spawnRandomDriver() {
     const loc = this.map.getRandomLocation();
@@ -61,9 +116,14 @@ class SimulationController {
     const vec = createVector(loc.x, loc.y);
     const driver = new Driver("D" + this.driverCounter++, vec);
 
+    // initialize availability timestamp for inactivity tracking
+    driver.availableSince = this.timeManager.getSimulationTime();
+
     // insert into availableDrivers linked list
     this.availableDrivers.insert(driver);
     this.addEvent(driver.id, `Hired with capacity ${driver.capacity} at (${Math.round(vec.x)}, ${Math.round(vec.y)})`);
+
+    return driver;
   }
 
   spawnRandomCustomer() {
@@ -150,13 +210,11 @@ class SimulationController {
         console.log(bestDriver.id, "score:", bestScore, "distanceScore:", distanceScore, "amenityScore:", amenityScore);
         // go to next driver in the list and repeat, if driver next is false, return highest rated driver
           if (!d.next) {
-           console.log(bestDriver.id, "final best score:", bestScore);
-            return true; // stop searching, we will return bestDriver after traversal
-
-          } else {            return false; // keep searching for better driver
-          }
-        //if driver next is false, return highest rated driver
-        //return frames_to_reach < remaining_frames;
+          console.log(bestDriver.id, "final best score:", bestScore);
+          return true; // stop searching, we will return bestDriver after traversal
+        } else {
+          return false; // keep searching for better driver
+        }
       }
     );
     
@@ -216,10 +274,11 @@ class SimulationController {
           console.log("this ride is:"+score);
         // Remove from active matches
         this.activeMatches.delete((c) => c.id === customer.id);
-        // Update driver rating based on score (use assignedDriver reference)
+        // Update driver rating and total rides based on completed delivery
         if (customer.assignedDriver) {
           const driver = this.availableDrivers.search((d) => d.id === customer.assignedDriver.id);
           if (driver) {
+            driver.totalrides = (driver.totalrides || 0) + 1;
             driver.numRatings++;
             driver.totalrating += score;
             driver.avgrating = driver.totalrating / driver.numRatings;
@@ -231,6 +290,7 @@ class SimulationController {
             this.VroomVroomCorp.lastRating = score; // update company last rating
             console.log("driver rating updated:", driver.avgrating);
             console.log("company average rating updated:", this.VroomVroomCorp.avgrating);
+            console.log("driver total rides updated:", driver.totalrides);
           }
         }
       }

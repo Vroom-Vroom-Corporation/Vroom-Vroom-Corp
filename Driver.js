@@ -2,6 +2,7 @@ class Driver {
   constructor(id, locationX, locationY, capacity = int(random(1, 4)), amenities = []) {
     // Allow passing a p5.Vector, a plain object with x/y, or separate numbers
     this.id = id;
+    this.totalrides=0;
     this.totalrating = 0;
     this.numRatings = 0;
     this.avgrating = 0;
@@ -62,6 +63,9 @@ class Driver {
     this.status = "AVAILABLE";
     this.currentRide = null;
     this.busyTimer = 0;
+    this.availableSince = (typeof simulation !== 'undefined' && simulation && simulation.timeManager)
+      ? simulation.timeManager.getSimulationTime()
+      : 0;
         
   }
   assignamenities(request) {
@@ -85,6 +89,16 @@ class Driver {
   }
 
   update() {
+    //after 7 days of avalible, set status to inactive
+    if (this.status === "AVAILABLE") {
+      let currentSimTime = simulation.timeManager.getSimulationTime();
+      if (!this.availableSince) {
+        this.availableSince = currentSimTime;
+      }
+      if (currentSimTime - this.availableSince > 7 * 24 * 60 * 60 * 1000) {
+        this.status = "INACTIVE";
+      }
+    }
     // Only proceed with movement if we have a target and a passenger
     if (!this.target || !this.currentRide) return;
 
@@ -110,6 +124,7 @@ class Driver {
         this.currentRide = null;
         this.target = null;
         this.state = "IDLE";
+        this.availableSince = simulation.timeManager.getSimulationTime();
       }
     } else if (passenger.status === "EXPIRED") {
       // If the passenger expired while we were en route, drop the ride
@@ -202,7 +217,8 @@ moveManhattan() {
     textSize(10);
     textAlign(CENTER);
     text(this.id, this.location.x, this.location.y - 15);
-    text("C:" + this.capacity, this.location.x+15, this.location.y);
-        text("S:" + this.speed, this.location.x-15, this.location.y);
+    text("C:" + this.capacity, this.location.x + 15, this.location.y);
+    text("S:" + this.speed, this.location.x - 15, this.location.y);
+    text("R:" + (this.totalrides || 0), this.location.x, this.location.y + 15);
   }
 }
