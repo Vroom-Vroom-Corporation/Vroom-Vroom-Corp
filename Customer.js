@@ -7,7 +7,7 @@ class Customer {
     this.destination = destination; // {x, y} object
     this.requestTime = millis();
     this.driversatsfaction = 0;
-
+//ammenities required
     this.want = int(random(0,5));
     if (this.want === 0) {
       this.amenitiesRequired = "WIFI";
@@ -24,6 +24,7 @@ class Customer {
               else if (this.want === 4) {
                 this.amenitiesRequired = "NOTHING";
               }
+      //initinalizing sub tier
       this.subtier = int(random(1,4));
       this.subscriptionPlan = null;
       if (this.subtier === 1) {
@@ -41,6 +42,7 @@ class Customer {
     this.status = "PENDING"; // PENDING, MATCHED, EXPIRED
     this.Pickedup = false;
     this.atdestination = false;
+    //random expire time in millis
     this.expireTime = this.requestTime + int(random(10000,30000)); // expires after 20 seconds
     this.assignedDriver = null; // will store driver object when matched
     // face image, subscrip plan ap ayp check canva

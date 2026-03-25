@@ -134,6 +134,7 @@ class Driver {
       this.state = "IDLE";
     }
   }
+  //movement
 moveManhattan() {
     if (!this.target) return;
 
@@ -148,7 +149,7 @@ moveManhattan() {
       this.location.y = targetY;
 
     }
-
+// Manhatten movement
     // Move horizontally first
     if (this.location.x !== targetX) {
       let dir = Math.sign(targetX - this.location.x); 
@@ -178,6 +179,8 @@ moveManhattan() {
         : "blue"
     );
 
+//Direction lines to show drivers movement
+
     // draw the planned Manhattan path (like a GPS) to the current target
     if (this.target) {
       let tx = this.target.location.x;
@@ -200,7 +203,7 @@ moveManhattan() {
        strokeWeight(1);
     }
 
-    // draw the driver itself
+    // draw driver
     stroke(0);
     strokeWeight(1);
     ellipse(this.location.x, this.location.y, 22);
@@ -217,6 +220,7 @@ moveManhattan() {
     textSize(10);
     textAlign(CENTER);
     text(this.id, this.location.x, this.location.y - 15);
+    //capacity on the right, speed on the left, total rides below
     text("C:" + this.capacity, this.location.x + 15, this.location.y);
     text("S:" + this.speed, this.location.x - 15, this.location.y);
     text("R:" + (this.totalrides || 0), this.location.x, this.location.y + 15);

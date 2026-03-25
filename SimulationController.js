@@ -21,7 +21,7 @@ class SimulationController {
     this.lastMonthlyHiringTime = this.timeManager.getSimulationTime();
     this.uiManager = new UIManager();
     this.addEvent("SYSTEM", "Simulation started");
-    //temp 3 drivers
+    //inital spawning for drivers
     for (let i = 0; i < 10; i++) {
           this.spawnRandomDriver();
     }
@@ -229,6 +229,8 @@ class SimulationController {
     }
   }
 
+//monee
+
   handleRideCompletions() {
     // Check for completed rides and generate revenue
     this.activeMatches.traverse((customer) => {
@@ -303,19 +305,37 @@ class SimulationController {
     // walk the availableDrivers linked list and call display() on each
     this.availableDrivers.traverse((driver) => {
       if (driver && typeof driver.display === "function") {
+          if (dist(mouseX, mouseY, driver.location.x, driver.location.y) < 20) {
+            fill(255, 255, 0);
+            // Show driver details on hover
+            textSize(12);
+            textAlign(LEFT);
+            text(`TIER: ${driver.cartier}`, driver.location.x + 15, driver.location.y - 10);
+            text(`Rating: ${driver.avgrating.toFixed(1)}`, driver.location.x + 15, driver.location.y + 5);
+            text(`Rides: ${driver.totalrides}`, driver.location.x + 15, driver.location.y + 20);
+          }
+
         driver.display();
+
       }
     });
   }
 
   renderCustomers() {
-    // walk the pendingRequests linked list and draw each customer
+    // walk the pendingRequests linked list and draw each customer (kill customer)
     this.pendingRequests.traverse((cust) => {
       if (cust.status === "EXPIRED") {
         this.pendingRequests.delete((c) => c.id === cust.id);
       }
       if (cust && typeof cust.display === "function") {
+
+          if (dist(mouseX, mouseY, cust.location.x, cust.location.y) < 20) {
+            //show destination and path
+            //
+          }
+
         cust.display();
+
       }
     });
     
