@@ -21,11 +21,20 @@ class LinkedList {
   }
 
   
-  traverse(callback) {
+  // traverse(callback) {
+  //   let current = this.head;
+  //   while (current !== null) {
+  //     //runs data
+  //     callback(current.data);
+  //     current = current.next;
+  //   }
+  // }
+
+  traverse(data){
     let current = this.head;
-    while (current !== null) {
-      callback(current.data);
-      current = current.next;
+    while (current !== null)
+    {
+      current = current.next;cgvhtbjmn uy
     }
   }
 

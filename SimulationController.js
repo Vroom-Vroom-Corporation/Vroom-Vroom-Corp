@@ -172,6 +172,7 @@ class SimulationController {
 
   processMatching() {
     // Get the first pending customer
+    //sort customer by priority here
     const firstCustomer = this.pendingRequests.search(() => true);
     //prioritize hier teir cousmuers
     if (!firstCustomer) return; // no pending requests
@@ -179,6 +180,7 @@ class SimulationController {
     let bestScore = -Infinity;
     let currentscore = -Infinity;
     // Get the first available driver that can reach within time
+    // => means its a function
     const driver = this.availableDrivers.search(
       (d) => {
         if (d.status !== "AVAILABLE") return false;
@@ -187,21 +189,22 @@ class SimulationController {
         let remaining_ms = firstCustomer.expireTime - millis();
         let frames_to_reach = distance / d.speed;
         let remaining_frames = remaining_ms * 60 / 1000; // assuming 60 FPS
+        //debugging is ai assisted
         console.log(`Evaluating driver ${d.id}: distance=${distance}, frames_to_reach=${frames_to_reach.toFixed(2)}, remaining_frames=${remaining_frames.toFixed(2)}`);
         //distance score = like 100 - distacee, so closer drivers get higher score
         //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
         let distanceScore = 100 - distance;
         let amenityScore = 0;
-        if (Array.isArray(d.amenities)) {
-          const requiredAmenities = firstCustomer.amenities || [];
-          const hasAllRequired = requiredAmenities.every((amenity) => d.amenities.includes(amenity));
-          if (hasAllRequired) {
-            amenityScore = 50;
-          } else {
-            const missingAmenities = requiredAmenities.filter((amenity) => !d.amenities.includes(amenity));
-            amenityScore = -20 * missingAmenities.length;
-          }
-        }
+        // if (Array.isArray(d.amenities)) {
+        //   const requiredAmenities = firstCustomer.amenities || [];
+        //   const hasAllRequired = requiredAmenities.every((amenity) => d.amenities.includes(amenity));
+        //   if (hasAllRequired) {
+        //     amenityScore = 50;
+        //   } else {
+        //     const missingAmenities = requiredAmenities.filter((amenity) => !d.amenities.includes(amenity));
+        //     amenityScore = -20 * missingAmenities.length;
+        //   }
+        // } re do this shi
         currentscore = distanceScore + amenityScore;// add scores
         if (currentscore > bestScore) {
           bestScore = currentscore;
@@ -304,7 +307,7 @@ class SimulationController {
   renderDrivers() {
     // walk the availableDrivers linked list and call display() on each
     this.availableDrivers.traverse((driver) => {
-      if (driver && typeof driver.display === "function") {
+      if (driver) {
           if (dist(mouseX, mouseY, driver.location.x, driver.location.y) < 20) {
             fill(255, 255, 0);
             // Show driver details on hover

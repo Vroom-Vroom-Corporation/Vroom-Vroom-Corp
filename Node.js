@@ -65,7 +65,7 @@ class Company{
     // this.ratinghistory = new LinkedList();
 
   }
-
+//ai assisted
   updateFinancials(amount) {
     this.revenue += amount;
     this.profit = this.revenue - this.expenses;
@@ -87,7 +87,7 @@ class Company{
     this.expenses += amount;
     this.profit = this.revenue - this.expenses;
   }
-
+//ai assisted
   completeRide(fare, rideTime) {
     this.totalRides++;
     this.updateFinancials(fare);
