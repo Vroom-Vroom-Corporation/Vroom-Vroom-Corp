@@ -28,7 +28,7 @@ class Driver {
     this.prevLocation = this.location.copy();
 
     this.capacity = capacity;
-    // start with an array so UI can safely call join() later
+    // start with an array so UI can safely call join() later (array is ai altered to match ui)
     this.amenities = Array.isArray(amenities) ? [...amenities] : [];
 
    // else want === 4 -> nothing, leave amenities array empty
@@ -108,6 +108,7 @@ class Driver {
 
     let passenger = this.currentRide;
    // console.log(passenger.status, passenger.Pickedup, passenger.atdestination);
+   //ai assisted function
     if (passenger.status === "MATCHED") {
       if (this.atTarget()) {
         passenger.Pickedup = true;
@@ -134,7 +135,7 @@ class Driver {
       this.state = "IDLE";
     }
   }
-  //movement
+  //movement (from original base code)
 moveManhattan() {
     if (!this.target) return;
 
