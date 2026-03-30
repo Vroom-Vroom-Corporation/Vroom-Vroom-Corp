@@ -19,7 +19,7 @@ class Driver {
       typeof locationX.y === "number"
     ) {
       // plain object {x, y} from TownMap.getRandomLocation
-      this.location = createVector(locationX.x, locationY.y);
+      this.location = createVector(locationX.x, locationX.y);
     } else {
       this.location = createVector(locationX, locationY);
     }
@@ -28,7 +28,7 @@ class Driver {
     this.prevLocation = this.location.copy();
 
     this.capacity = capacity;
-    // start with an array so UI can safely call join() later
+    // start with an array so UI can safely call join() later (array is ai altered to match ui)
     this.amenities = Array.isArray(amenities) ? [...amenities] : [];
 
    // else want === 4 -> nothing, leave amenities array empty
@@ -59,7 +59,7 @@ class Driver {
                      this.amenities.push("CHILD_SEAT");
     }
 
-    this.state = null;
+    this.state = "IDLE";
     this.status = "AVAILABLE";
     this.currentRide = null;
     this.busyTimer = 0;
@@ -108,6 +108,7 @@ class Driver {
 
     let passenger = this.currentRide;
    // console.log(passenger.status, passenger.Pickedup, passenger.atdestination);
+   //ai assisted function
     if (passenger.status === "MATCHED") {
       if (this.atTarget()) {
         passenger.Pickedup = true;
@@ -134,7 +135,7 @@ class Driver {
       this.state = "IDLE";
     }
   }
-  //movement
+  //movement (from original base code)
 moveManhattan() {
     if (!this.target) return;
 

@@ -1,4 +1,4 @@
-class TimeManager {
+class TimeManager {// this page is ai assisted
   constructor() {
     // Start at March 9, 2026, 00:00:00
     this.startDate = new Date(2026, 2, 9, 0, 0, 0); // Month is 0-indexed

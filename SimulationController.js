@@ -51,7 +51,7 @@ class SimulationController {
     // Trigger monthly hiring at fixed simulation intervals.
     const currentSimTime = this.timeManager.getSimulationTime();
     const monthMs = 30 * 24 * 60 * 60 * 1000;
-    if (currentSimTime - this.lastMonthlyHiringTime >= monthMs) {
+    if (currentSimTime - this.lastMonthlyHiringTime >= monthMs) { // 30 day timer is ai assisted
       this.monthlyHiring();
       // Keep the next cycle aligned to 30 days. If we are far past one or more cycles, catch up.
       const cyclesPassed = Math.floor((currentSimTime - this.lastMonthlyHiringTime) / monthMs);
@@ -91,7 +91,7 @@ class SimulationController {
 
   monthlyHiring() {
     //every month, hire the avgrating # of drivers (rounded down) remove cost of hiring from earnings, add to expenses, then add new drivers to available drivers linked list
-    const driversToHire = Math.floor(this.VroomVroomCorp.avgrating);
+    const driversToHire = Math.floor(this.VroomVroomCorp.avgrating); //may cahnge to fixed value 
     for (let i = 0; i < driversToHire; i++) {
       const d = this.spawnRandomDriver();
       //basic 100. silver 500. gold 1000. platinum 5000.
@@ -116,12 +116,12 @@ class SimulationController {
     const vec = createVector(loc.x, loc.y);
     const driver = new Driver("D" + this.driverCounter++, vec);
 
-    // initialize availability timestamp for inactivity tracking
+    // initialize availability timestamp for inactivity tracking // ai assisted
     driver.availableSince = this.timeManager.getSimulationTime();
 
     // insert into availableDrivers linked list
     this.availableDrivers.insert(driver);
-    this.addEvent(driver.id, `Hired with capacity ${driver.capacity} at (${Math.round(vec.x)}, ${Math.round(vec.y)})`);
+    this.addEvent(driver.id, `Hired with capacity ${driver.capacity} at (${Math.round(vec.x)}, ${Math.round(vec.y)})`); //ai assisted doucmentation
 
     return driver;
   }
@@ -131,13 +131,14 @@ class SimulationController {
     const dest = this.map.getRandomLocation();
     const customer = new Customer("C" + this.customerCounter++, loc, dest);
     this.pendingRequests.insert(customer);
+    //assisted doucmentation
     this.addEvent(customer.id, `New request with ${customer.passengers} passengers from (${Math.round(loc.x)}, ${Math.round(loc.y)}) to (${Math.round(dest.x)}, ${Math.round(dest.y)})`);
-    this.VroomVroomCorp.updateFinancials(10); //change with customer class, maybe based on passengers or distance or smth
+   // this.VroomVroomCorp.updateFinancials(10); //change with customer class, maybe based on passengers or distance or smth
   }
 
   // Calculate spawn interval based on current simulation time
   // Returns shorter intervals during peak hours for increased spawning rates
-  calculateSpawnInterval() {
+  calculateSpawnInterval() { //ai assisted
     const hour = this.timeManager.getHour();
     const isWeekday = this.timeManager.isWeekday();
 
@@ -173,30 +174,31 @@ class SimulationController {
   processMatching() {
     // Get the first pending customer
     //sort customer by priority here
-    const firstCustomer = this.pendingRequests.search(() => true);
-    //prioritize hier teir cousmuers
-    if (!firstCustomer) return; // no pending requests
+    this.pendingRequests.traverse((customer) => {
+    //prioritize hier teir cousmuers, customer sort here
+    if (!customer || customer.status !== "PENDING") return; // no pending requests
+    //driver sort
     let bestDriver = null;
     let bestScore = -Infinity;
     let currentscore = -Infinity;
     // Get the first available driver that can reach within time
     // => means its a function
-    const driver = this.availableDrivers.search(
+     this.availableDrivers.traverse(
       (d) => {
         if (d.status !== "AVAILABLE") return false;
-        if (d.capacity < firstCustomer.passengers) return false; // capacity check
-        let distance = this.map.getDistance(d.location, firstCustomer.location);
-        let remaining_ms = firstCustomer.expireTime - millis();
+        if (d.capacity < customer.passengers) return false; // capacity check
+        let distance = this.map.getDistance(d.location, customer.location);
+        let remaining_ms = customer.expireTime - millis();
         let frames_to_reach = distance / d.speed;
         let remaining_frames = remaining_ms * 60 / 1000; // assuming 60 FPS
-        //debugging is ai assisted
+        //logging is ai assisted for debugging pruposes
         console.log(`Evaluating driver ${d.id}: distance=${distance}, frames_to_reach=${frames_to_reach.toFixed(2)}, remaining_frames=${remaining_frames.toFixed(2)}`);
         //distance score = like 100 - distacee, so closer drivers get higher score
         //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
         let distanceScore = 100 - distance;
         let amenityScore = 0;
-        // if (Array.isArray(d.amenities)) {
-        //   const requiredAmenities = firstCustomer.amenities || [];
+        // if (Array.isArray(d.amenities)) { redo amenitie thingy
+        //   const requiredAmenities = customer.amenities || [];
         //   const hasAllRequired = requiredAmenities.every((amenity) => d.amenities.includes(amenity));
         //   if (hasAllRequired) {
         //     amenityScore = 50;
@@ -204,7 +206,8 @@ class SimulationController {
         //     const missingAmenities = requiredAmenities.filter((amenity) => !d.amenities.includes(amenity));
         //     amenityScore = -20 * missingAmenities.length;
         //   }
-        // } re do this shi
+        // }
+        
         currentscore = distanceScore + amenityScore;// add scores
         if (currentscore > bestScore) {
           bestScore = currentscore;
@@ -212,24 +215,20 @@ class SimulationController {
         }
         console.log(bestDriver.id, "score:", bestScore, "distanceScore:", distanceScore, "amenityScore:", amenityScore);
         // go to next driver in the list and repeat, if driver next is false, return highest rated driver
-          if (!d.next) {
-          console.log(bestDriver.id, "final best score:", bestScore);
-          return true; // stop searching, we will return bestDriver after traversal
-        } else {
-          return false; // keep searching for better driver
-        }
+      
       }
     );
     
     // If both exist, assign the customer as the driver's target
-    if (driver && firstCustomer) {
-      driver.assignRide(firstCustomer, 300);
-      firstCustomer.aknowledgeMatch(driver);
-      this.addEvent("MATCH", `${firstCustomer.id} matched with ${driver.id}`);
+    if (bestDriver && customer) {
+      bestDriver.assignRide(customer, 300);
+      customer.aknowledgeMatch(bestDriver);
+      this.addEvent("MATCH", `${customer.id} matched with ${bestDriver.id}`);// debugging by ai
       // Move the customer from pendingRequests to activeMatches
-      this.pendingRequests.delete((c) => c.id === firstCustomer.id);
-      this.activeMatches.insert(firstCustomer);
+      this.pendingRequests.delete((c) => c.id === customer.id);
+      this.activeMatches.insert(customer);
     }
+    });
   }
 
 //monee
@@ -273,6 +272,7 @@ class SimulationController {
         
         // Complete the ride
         this.VroomVroomCorp.completeRide(fare, rideTime);
+        //ai debugging
         this.addEvent("RIDE", `${customer.id} completed ride - $${fare.toFixed(2)} earned`);
         console.log(`${customer.id} completed ride - $${fare.toFixed(2)} earned`);
         console.log(tips);
@@ -313,6 +313,7 @@ class SimulationController {
             // Show driver details on hover
             textSize(12);
             textAlign(LEFT);
+            //ui ai assisted
             text(`TIER: ${driver.cartier}`, driver.location.x + 15, driver.location.y - 10);
             text(`Rating: ${driver.avgrating.toFixed(1)}`, driver.location.x + 15, driver.location.y + 5);
             text(`Rides: ${driver.totalrides}`, driver.location.x + 15, driver.location.y + 20);
@@ -325,7 +326,7 @@ class SimulationController {
   }
 
   renderCustomers() {
-    // walk the pendingRequests linked list and draw each customer (kill customer)
+    // walk the pendingRequests linked list and draw each customer (kill myself)
     this.pendingRequests.traverse((cust) => {
       if (cust.status === "EXPIRED") {
         this.pendingRequests.delete((c) => c.id === cust.id);
@@ -367,7 +368,7 @@ class SimulationController {
     //ui here, maybe show number of pending requests, available drivers, etc.
   }
 
-  updateUI() {
+  updateUI() { ///ai assisted
     const pendingCustomers = [];
     const matchedCustomers = [];
     const allDrivers = [];

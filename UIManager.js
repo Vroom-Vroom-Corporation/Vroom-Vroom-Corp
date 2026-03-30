@@ -1,4 +1,4 @@
-class UIManager {
+class UIManager {// this page is ai assisted
   constructor() {
     this.sidebarOpen = false;
     this.activeTab = 'customers'; // 'customers', 'drivers', or 'company'

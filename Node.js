@@ -8,6 +8,8 @@ class Node {
   }
 }
 
+
+//ai assisted
 class UniversalDeathClock {
   constructor() {
     this.startTime = millis();
@@ -70,7 +72,7 @@ class Company{
     this.revenue += amount;
     this.profit = this.revenue - this.expenses;
     
-    // Track revenue history for graph (every $1000 increment)
+    // Track revenue history for graph (every $1000 increment) ai assisted money management 
     const revenueIncrement = Math.floor(this.revenue / 1000);
     if (revenueIncrement > this.lastRevenueUpdate) {
       this.revenueHistory.push(amount);
@@ -91,7 +93,7 @@ class Company{
   completeRide(fare, rideTime) {
     this.totalRides++;
     this.updateFinancials(fare);
-    
+    // ai made the rest of this code below, dont know if we actually need
     // Update average ride time (weighted average)
     this.avgRideTime = ((this.avgRideTime * (this.totalRides - 1)) + rideTime) / this.totalRides;
     
@@ -111,7 +113,7 @@ class Company{
   }
 
   getCompanyData() {
-    return {
+    return { //ai assised
       revenue: Math.round(this.revenue),
       expenses: Math.round(this.expenses),
       profit: Math.round(this.profit),
@@ -127,7 +129,7 @@ class Company{
     };
   }
 
-  monthlyReport() {
+  monthlyReport() { //ai assisted
     console.log(`Monthly Report for ${this.name}:`);
     console.log(`Revenue: $${this.revenue.toFixed(2)}`);
     console.log(`Expenses: $${this.expenses.toFixed(2)}`);

@@ -20,21 +20,12 @@ class LinkedList {
    // console.log(`Inserted: ${data}`);
   }
 
-  
-  // traverse(callback) {
-  //   let current = this.head;
-  //   while (current !== null) {
-  //     //runs data
-  //     callback(current.data);
-  //     current = current.next;
-  //   }
-  // }
-
-  traverse(data){
+ 
+  traverse(callback) {// callback is the instance
     let current = this.head;
-    while (current !== null)
-    {
-      current = current.next;cgvhtbjmn uy
+    while (current !== null) {
+      callback(current.data);
+      current = current.next;
     }
   }
 
