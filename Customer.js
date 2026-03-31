@@ -1,11 +1,12 @@
 class Customer {
-  constructor(id, location, destination) {
+  constructor(id, location, destination, timeManager) {
+    this.timeManager = timeManager;
     this.id = id;
     this.location = location;
     this.passengers = int(random(1, 4));
     this.amenitiesRequired = null;
     this.destination = destination; // {x, y} object
-    this.requestTime = millis();
+    this.requestTime = this.timeManager ? this.timeManager.getSimulationTime() : millis();
     this.driversatsfaction = 0;
 //ammenities required
     this.want = int(random(0,5));
@@ -42,8 +43,12 @@ class Customer {
     this.status = "PENDING"; // PENDING, MATCHED, EXPIRED
     this.Pickedup = false;
     this.atdestination = false;
-    //random expire time in millis
-    this.expireTime = this.requestTime + int(random(10000,30000)); // expires after 20 seconds
+    //random expire time in real millis, converted to sim time
+    let expireDelay = int(random(30000, 90000)); // 30-90 real seconds
+    if (this.timeManager) {
+      expireDelay = Math.round(expireDelay / this.timeManager.getTimeScale());
+    }
+    this.expireTime = this.requestTime + expireDelay * (this.timeManager ? this.timeManager.simulationSpeed : 1000);
     this.assignedDriver = null; // will store driver object when matched
     // face image, subscrip plan ap ayp check canva
   }
@@ -60,14 +65,16 @@ class Customer {
     //driver.ame
   }
 
-  update() {  
-    //console.log("deezx");
-    if (millis() > this.expireTime) {
-      if(this.status === "PENDING"||this.status === "MATCHED") {
-      this.status = "EXPIRED";
-    }    
+  update() {
+    const now = this.timeManager ? this.timeManager.getSimulationTime() : millis();
+
+    if (now > this.expireTime) {
+      if (this.status === "PENDING" || this.status === "MATCHED") {
+        this.status = "EXPIRED";
+      }
+    }
   }
-}
+
 
   display() {
    
@@ -82,7 +89,7 @@ class Customer {
     textAlign(CENTER);
     text(this.id, this.location.x, this.location.y - 14);
         text(this.passengers, this.location.x, this.location.y + 14);
-        text(Math.max(0, Math.ceil((this.expireTime - millis()) / 1000)), this.location.x-15, this.location.y );
+        text(Math.max(0, Math.ceil((this.expireTime - this.timeManager.getSimulationTime()) / this.timeManager.simulationSpeed / 1000)), this.location.x-15, this.location.y );
     } else if (this.status === "MATCHED") {
       fill(255, 100, 100);
       rectMode(CENTER);
@@ -92,7 +99,7 @@ class Customer {
     textAlign(CENTER);
     text(this.id, this.location.x, this.location.y - 14);
         text(this.passengers, this.location.x, this.location.y + 14);
-                text(Math.max(0, Math.ceil((this.expireTime - millis()) / 1000)), this.location.x-15, this.location.y );
+                text(Math.max(0, Math.ceil((this.expireTime - this.timeManager.getSimulationTime()) / this.timeManager.simulationSpeed / 1000)), this.location.x-15, this.location.y );
     }  else if (this.status === "TRAVELLING") {
       fill(255);
       rectMode(CENTER);

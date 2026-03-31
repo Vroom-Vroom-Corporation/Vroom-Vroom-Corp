@@ -130,13 +130,13 @@ class Company{
   }
 
   monthlyReport() { //ai assisted
-    console.log(`Monthly Report for ${this.name}:`);
-    console.log(`Revenue: $${this.revenue.toFixed(2)}`);
-    console.log(`Expenses: $${this.expenses.toFixed(2)}`);
-    console.log(`Profit: $${this.profit.toFixed(2)}`);
-    console.log(`Total Rides: ${this.totalRides}`);
-    console.log(`Active Drivers: ${this.activeDrivers}`);
-    console.log(`Customer Satisfaction: ${this.satisfaction.toFixed(1)}%`);
+    // console.log(`Monthly Report for ${this.name}:`);
+    // console.log(`Revenue: $${this.revenue.toFixed(2)}`);
+    // console.log(`Expenses: $${this.expenses.toFixed(2)}`);
+    // console.log(`Profit: $${this.profit.toFixed(2)}`);
+    // console.log(`Total Rides: ${this.totalRides}`);
+    // console.log(`Active Drivers: ${this.activeDrivers}`);
+    // console.log(`Customer Satisfaction: ${this.satisfaction.toFixed(1)}%`);
   }
 
 }
