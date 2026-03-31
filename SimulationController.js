@@ -54,12 +54,12 @@ class SimulationController {
 
     // Trigger monthly hiring at fixed simulation intervals.
     const currentSimTime = this.timeManager.getSimulationTime();
-    const monthMs = 15 * 24 * 60 * 60 * 1000;
-    if (currentSimTime - this.lastMonthlyHiringTime >= monthMs) { // 15 day timer is ai assisted
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    if (currentSimTime - this.lastMonthlyHiringTime >= weekMs) { // 15 day timer is ai assisted
       this.monthlyHiring();
       // Keep the next cycle aligned to 15 days. If we are far past one or more cycles, catch up.
-      const cyclesPassed = Math.floor((currentSimTime - this.lastMonthlyHiringTime) / monthMs);
-      this.lastMonthlyHiringTime += cyclesPassed * monthMs;
+      const cyclesPassed = Math.floor((currentSimTime - this.lastMonthlyHiringTime) / weekMs);
+      this.lastMonthlyHiringTime += cyclesPassed * weekMs;
     }
 
   }
