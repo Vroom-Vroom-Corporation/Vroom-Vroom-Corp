@@ -1,15 +1,24 @@
 class TimeManager {// this page is ai assisted
   constructor() {
     // Start at March 9, 2026, 00:00:00
+    this.timeScale = 1; // 0.5x, 1x, 2x, etc.
     this.startDate = new Date(2026, 2, 9, 0, 0, 0); // Month is 0-indexed
     this.startMillis = millis();
-    this.simulationSpeed = 1000; // 1 real millisecond = 1000 simulation milliseconds (1 real second = 16.67 sim minutes at 60fps)
+    this.simulationSpeed = 1000; // 1 real ms = 1000 sim ms
   }
 
   // Get current simulation time in milliseconds since start
   getSimulationTime() {
     const elapsed = millis() - this.startMillis;
-    return elapsed * this.simulationSpeed;
+    return elapsed * this.simulationSpeed * this.timeScale;
+  }
+
+  getTimeScale() {
+    return this.timeScale;
+  }
+
+  setTimeScale(value) {
+    this.timeScale = Math.max(0.1, value);
   }
 
   // Get current date and time

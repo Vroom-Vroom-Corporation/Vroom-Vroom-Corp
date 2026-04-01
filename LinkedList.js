@@ -24,7 +24,6 @@ class LinkedList {
   traverse(callback) {// callback is the instance
     let current = this.head;
     while (current !== null) {
-      // do whatever data is stored in the node
       callback(current.data);
       current = current.next;
     }

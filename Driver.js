@@ -19,7 +19,7 @@ class Driver {
       typeof locationX.y === "number"
     ) {
       // plain object {x, y} from TownMap.getRandomLocation
-      this.location = createVector(locationX.x, locationY.y);
+      this.location = createVector(locationX.x, locationX.y);
     } else {
       this.location = createVector(locationX, locationY);
     }
@@ -59,7 +59,7 @@ class Driver {
                      this.amenities.push("CHILD_SEAT");
     }
 
-    this.state = null;
+    this.state = "IDLE";
     this.status = "AVAILABLE";
     this.currentRide = null;
     this.busyTimer = 0;
@@ -139,27 +139,31 @@ class Driver {
 moveManhattan() {
     if (!this.target) return;
 
+    let scale = 1;
+    if (typeof simulation !== 'undefined' && simulation.timeManager) {
+      scale = simulation.timeManager.getTimeScale();
+    }
+
+    let step = this.speed * scale;
+    if (step < 1) step = 1;
+
     let targetX = this.target.location.x;
     let targetY = this.target.location.y;
 
-    if(abs(targetX - this.location.x) < this.speed) {
+    if (abs(targetX - this.location.x) < step) {
       this.location.x = targetX;
-
     }
-    if(abs(targetY - this.location.y) < this.speed) {
+    if (abs(targetY - this.location.y) < step) {
       this.location.y = targetY;
+    }
 
-    }
-// Manhatten movement
-    // Move horizontally first
+    // Manhatten movement
     if (this.location.x !== targetX) {
-      let dir = Math.sign(targetX - this.location.x); 
-      this.location.x += dir * this.speed;
-    }
-    // Then move vertically
-    else if (this.location.y !== targetY) {
+      let dir = Math.sign(targetX - this.location.x);
+      this.location.x += dir * step;
+    } else if (this.location.y !== targetY) {
       let dir = Math.sign(targetY - this.location.y);
-      this.location.y += dir * this.speed;
+      this.location.y += dir * step;
     }
   }
   atTarget() {

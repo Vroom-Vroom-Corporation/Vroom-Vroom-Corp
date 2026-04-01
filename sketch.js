@@ -1,5 +1,8 @@
 let simulation;
 let mapview;
+let timescaleValues = [0.1, 0.5, 1, 1.5, 2, 5, 10];
+let currentTimescaleIndex = 2; // start at 1
+let timescaleButton;
 //let car;
 function preload() {
   // make sure the path matches where the file actually lives; the image
@@ -15,6 +18,19 @@ function setup() {
   car = new Driver(0, createVector(400, 300));
 
   simulation = new SimulationController(width, height);
+//ai assisted time scale ui
+  // Set initial timescale
+  simulation.timeManager.setTimeScale(timescaleValues[currentTimescaleIndex]);
+
+  // Create timescale button in bottom right
+  timescaleButton = createButton('Timescale: ' + timescaleValues[currentTimescaleIndex] + 'x');
+  timescaleButton.position(width - 120, height - 40);
+  timescaleButton.mousePressed(() => {
+    currentTimescaleIndex = (currentTimescaleIndex + 1) % timescaleValues.length;
+    let newScale = timescaleValues[currentTimescaleIndex];
+    simulation.timeManager.setTimeScale(newScale);
+    timescaleButton.html('Timescale: ' + newScale + 'x');
+  });
 }
 
 function draw() {

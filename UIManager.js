@@ -133,7 +133,7 @@ class UIManager {// this page is ai assisted
     }
   }
 
-  updateCustomerList(pendingCustomers, matchedCustomers, simulation) {
+  updateCustomerList(pendingCustomers, matchedCustomers, travelingCustomers, simulation) {
     const listContainer = document.getElementById('customer-list');
     listContainer.innerHTML = '';
 
@@ -173,8 +173,22 @@ class UIManager {// this page is ai assisted
       listContainer.appendChild(matchedSection);
     }
 
+    // Display traveling customers
+    if (travelingCustomers.length > 0) {
+      const travelingSection = document.createElement('div');
+      travelingSection.className = 'list-section';
+      travelingSection.innerHTML = '<h3 class="section-title">Traveling</h3>';
+      
+      travelingCustomers.forEach((customer) => {
+        const card = this.createCustomerCard(customer, null); // Assuming no driver shown for traveling
+        travelingSection.appendChild(card);
+      });
+      
+      listContainer.appendChild(travelingSection);
+    }
+
     // Show empty state if no customers
-    if (pendingCustomers.length === 0 && matchedCustomers.length === 0) {
+    if (pendingCustomers.length === 0 && matchedCustomers.length === 0 && travelingCustomers.length === 0) {
       listContainer.innerHTML = '<div class="empty-state">No active customers</div>';
     }
   }

@@ -67,7 +67,7 @@ class Company{
     // this.ratinghistory = new LinkedList();
 
   }
-
+//ai assisted
   updateFinancials(amount) {
     this.revenue += amount;
     this.profit = this.revenue - this.expenses;
@@ -89,7 +89,7 @@ class Company{
     this.expenses += amount;
     this.profit = this.revenue - this.expenses;
   }
-
+//ai assisted
   completeRide(fare, rideTime) {
     this.totalRides++;
     this.updateFinancials(fare);
@@ -130,13 +130,13 @@ class Company{
   }
 
   monthlyReport() { //ai assisted
-    console.log(`Monthly Report for ${this.name}:`);
-    console.log(`Revenue: $${this.revenue.toFixed(2)}`);
-    console.log(`Expenses: $${this.expenses.toFixed(2)}`);
-    console.log(`Profit: $${this.profit.toFixed(2)}`);
-    console.log(`Total Rides: ${this.totalRides}`);
-    console.log(`Active Drivers: ${this.activeDrivers}`);
-    console.log(`Customer Satisfaction: ${this.satisfaction.toFixed(1)}%`);
+    // console.log(`Monthly Report for ${this.name}:`);
+    // console.log(`Revenue: $${this.revenue.toFixed(2)}`);
+    // console.log(`Expenses: $${this.expenses.toFixed(2)}`);
+    // console.log(`Profit: $${this.profit.toFixed(2)}`);
+    // console.log(`Total Rides: ${this.totalRides}`);
+    // console.log(`Active Drivers: ${this.activeDrivers}`);
+    // console.log(`Customer Satisfaction: ${this.satisfaction.toFixed(1)}%`);
   }
 
 }
