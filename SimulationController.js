@@ -37,7 +37,9 @@ class SimulationController {
     this.frameCounter++;
     this.MassLayoffs();
     // Calculate dynamic spawn interval based on current time
-    const spawnInterval = this.calculateSpawnInterval();
+    const baseSpawnInterval = this.calculateSpawnInterval();
+    const timeScale = this.timeManager.getTimeScale();
+    const spawnInterval = Math.max(1, Math.round(baseSpawnInterval / timeScale));
 
     if (this.frameCounter % spawnInterval === 0) {
       this.spawnRandomCustomer();
@@ -162,7 +164,7 @@ class SimulationController {
     const ratingFactor = rating / 5; // normalize to 0..1 (assuming 5 is max rating)
 
     // combine base interval with rating factor; ensure it never goes below a minimum
-    const interval = baseInterval / (1 + ratingFactor);
+    const interval =( baseInterval / (1 + ratingFactor));
     return Math.max(20, Math.round(interval));
   }
 
@@ -179,6 +181,19 @@ class SimulationController {
     this.handleExpirations();
   }
 
+//driversort()
+//{
+//every 14 days, sort drivers based on rating
+//highest frst
+//lowest last
+//greater likelihood of a match early, lowering wait times
+//}
+
+//customersort()
+//{
+//every 50 (num can change) requests, order passengers to prioritize higher paying and more needy
+//prioirty sub tier > time until expiry > passenger count > amenity count
+//}
 
   processMatching() {
     // Get the first pending customer
@@ -210,12 +225,12 @@ class SimulationController {
         let distanceScore = 100 - distance;
         let amenityScore = 0;
   
-        const reqamenities = customer.amenitiesRequired;
-        for (let i = 0; i < reqamenities.length; i++) {
+        const requiredAmenities = customer.amenitiesRequired; // note:ai recommeded putting || [];
+        for (let i = 0; i < requiredAmenities.length; i++) {
           for (let j = 0; j < d.amenities.length; j++) {
-            if(d.ameinities[j] === reqamenities[i]){
-            amenityScore += 10;
-           }
+            if(d.amenities[j] === requiredAmenities[i]){
+              amenityScore += 30;
+            }
           }
         }
         let currentscore = distanceScore + amenityScore;// add scores
@@ -252,7 +267,8 @@ class SimulationController {
     this.activeMatches.traverse((customer) => {
         if (customer.status === "DELIVERED") {
         // Calculate fare based on distance and passengers
-          const distance = this.map.getDistance(customer.location, customer.destination);
+          const rawDistance = this.map.getDistance(customer.location, customer.destination);
+          const distance = isNaN(rawDistance) ? 0 : rawDistance;
         let score =0;
           let tips=0;
 
@@ -277,8 +293,8 @@ class SimulationController {
             score +=5;
           }
           score += customer.driversatsfaction/5; // increase score based on driver satisfaction, max 5 points
-            tips = customer.driversatsfaction; // tips based on driver satisfaction, max 10% of fare
-        const fare = baseFare + (distance/1000 * distanceRate) + (customer.passengers * passengerRate) + tips;
+            tips = isNaN(customer.driversatsfaction) ? 0 : customer.driversatsfaction; // tips based on driver satisfaction, max 10% of fare
+        const fare = baseFare + (distance/1000 * distanceRate) + ((isNaN(customer.passengers) ? 1 : customer.passengers) * passengerRate) + tips;
         // increased earnings amenities
         
         // Random ride time between 8-25 minutes

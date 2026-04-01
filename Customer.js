@@ -2,30 +2,34 @@ class Customer {
   constructor(id, location, destination, timeManager) {
     this.timeManager = timeManager;
     this.id = id;
-    this.location = location;
+    this.location = createVector(location.x, location.y);
     this.passengers = int(random(1, 4));
-    this.amenitiesRequired = null;
-    this.destination = destination; // {x, y} object
+    this.amenitiesRequired = [];
+    this.destination = createVector(destination.x, destination.y); // {x, y} object
     //ai assisted timer for request expiration
     this.requestTime = this.timeManager ? this.timeManager.getSimulationTime() : millis();
-    this.driversatsfaction = 0;
-//ammenities required
-    this.want = int(random(0,5));
+    this.amenitiesRequired = [];
+
+    this.amentiys = int(random(0,5));
+    for (let i = 0; i < this.amentiys; i++) 
+    {
+          this.want = int(random(0,5));
     if (this.want === 0) {
-      this.amenitiesRequired = "WIFI";
+      this.amenitiesRequired.push("WIFI");
     }
       else if (this.want === 1) {
-        this.amenitiesRequired = "PET_FRIENDLY";
+        this.amenitiesRequired.push("PET_FRIENDLY");
       }
         else if (this.want === 2) {
-          this.amenitiesRequired = "WHEELCHAIR_ACCESSIBLE";
+          this.amenitiesRequired.push("WHEELCHAIR_ACCESSIBLE");
         }
             else if (this.want === 3) {
-              this.amenitiesRequired = "CHILD_SEAT";
+              this.amenitiesRequired.push("CHILD_SEAT");
             }
               else if (this.want === 4) {
-                this.amenitiesRequired = "NOTHING";
+                // NOTHING - leave array empty
               }
+            }
       //initinalizing sub tier
       this.subtier = int(random(1,4));
       this.subscriptionPlan = null;
