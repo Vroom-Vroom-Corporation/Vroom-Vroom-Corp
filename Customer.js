@@ -6,6 +6,7 @@ class Customer {
     this.passengers = int(random(1, 4));
     this.amenitiesRequired = null;
     this.destination = destination; // {x, y} object
+    //ai assisted timer for request expiration
     this.requestTime = this.timeManager ? this.timeManager.getSimulationTime() : millis();
     this.driversatsfaction = 0;
 //ammenities required
@@ -66,6 +67,7 @@ class Customer {
   }
 
   update() {
+    //ai assisted timer for request expiration
     const now = this.timeManager ? this.timeManager.getSimulationTime() : millis();
 
     if (now > this.expireTime) {

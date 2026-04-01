@@ -209,17 +209,15 @@ class SimulationController {
         //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
         let distanceScore = 100 - distance;
         let amenityScore = 0;
-        // if (Array.isArray(d.amenities)) { //redo amenitie thingy
-        //   const requiredAmenities = firstCustomer.amenities || [];
-        //   const hasAllRequired = requiredAmenities.every((amenity) => d.amenities.includes(amenity));
-        //   if (hasAllRequired) {
-        //     amenityScore = 50;
-        //   } else {
-        //     const missingAmenities = requiredAmenities.filter((amenity) => !d.amenities.includes(amenity));
-        //     amenityScore = -20 * missingAmenities.length;
-        //   }
-        // }
-        
+  
+        const reqamenities = customer.amenitiesRequired;
+        for (let i = 0; i < reqamenities.length; i++) {
+          for (let j = 0; j < d.amenities.length; j++) {
+            if(d.ameinities[j] === reqamenities[i]){
+            amenityScore += 10;
+           }
+          }
+        }
         let currentscore = distanceScore + amenityScore;// add scores
         if (currentscore > bestScore) {
           bestScore = currentscore;
