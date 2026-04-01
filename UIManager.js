@@ -396,8 +396,8 @@ class UIManager {// this page is ai assisted
         </div>
       </div>
       
-      <div class="monthly-report">
-        <h3 class="section-title">Monthly Report</h3>
+      <div class="report">
+        <h3 class="section-title">Report</h3>
         <div class="report-content">
           <div class="report-item">
             <span class="report-label">Total Rides:</span>
@@ -417,31 +417,6 @@ class UIManager {// this page is ai assisted
           </div>
         </div>
       </div>
-      
-      <div class="performance-graph">
-        <h3 class="section-title">Revenue Trend</h3>
-        <div class="graph-placeholder">
-          <div class="graph-bars">
-            ${this.generateGraphBars(companyData.revenueHistory)}
-          </div>
-        </div>
-      </div>
     `;
-  }
-
-  generateGraphBars(revenueHistory) {
-    if (!revenueHistory || revenueHistory.length === 0) {
-      return '<div class="no-data">No data available</div>';
-    }
-
-    const maxRevenue = Math.max(...revenueHistory);
-    return revenueHistory.map((revenue, index) => {
-      const height = maxRevenue > 0 ? (revenue / maxRevenue) * 100 : 0;
-      return `
-        <div class="graph-bar" style="height: ${height}%">
-          <div class="bar-value">$${revenue.toLocaleString()}</div>
-        </div>
-      `;
-    }).join('');
   }
 }
