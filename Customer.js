@@ -62,10 +62,12 @@ class Customer {
     this.status = "MATCHED";
     this.assignedDriver = driver; // remember which driver was assigned
     //if driver has the amenity required, increase satisfaction, otherwise decrease satisfaction
-    if (driver.amenities.includes(this.amenitiesRequired) || this.amenitiesRequired === "NOTHING") {
-      this.driversatsfaction += 5; // increase satisfaction by 5 for a match
+    //ai modifed to match modified systems
+    const hasRequiredAmenities = this.amenitiesRequired.length === 0 || this.amenitiesRequired.every(amenity => driver.amenities.includes(amenity));
+    if (hasRequiredAmenities) {
+      this.driversatsfaction = (this.driversatsfaction || 0) + 5; // increase satisfaction by 5 for a match
     } else {
-      this.driversatsfaction -= 5; // decrease satisfaction by 5 for a mismatch
+      this.driversatsfaction = (this.driversatsfaction || 0) - 5; // decrease satisfaction by 5 for a mismatch
     }
     //driver.ame
   }
