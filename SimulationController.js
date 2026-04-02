@@ -204,7 +204,8 @@ class SimulationController {
     //driver sort
     let bestDriver = null;
     let bestScore = -Infinity;
-
+    let bestDistanceScore = 0;
+    let bestAmenityScore = 0;
     // Get the first available driver that can reach within time
     //limit to the x closest drivers, maybe conditional to rush hours
     // => means its a function
