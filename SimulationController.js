@@ -22,11 +22,11 @@ class SimulationController {
     this.uiManager = new UIManager();
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 5000; i++) {
+    for (let i = 0; i < 1000; i++) {
           this.spawnRandomDriver();
     }
     //test case for spawning customers at start
-    for (let i = 0; i < 5000; i++) {
+    for (let i = 0; i < 1000; i++) {
       this.spawnRandomCustomer();
     }
        
@@ -204,9 +204,9 @@ class SimulationController {
     //driver sort
     let bestDriver = null;
     let bestScore = -Infinity;
-    let bestDistanceScore = 0;
-    let bestAmenityScore = 0;
+
     // Get the first available driver that can reach within time
+    //limit to the x closest drivers, maybe conditional to rush hours
     // => means its a function
      this.availableDrivers.traverse(
       (d) => {

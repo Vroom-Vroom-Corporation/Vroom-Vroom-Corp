@@ -63,6 +63,7 @@ class Driver {
     this.status = "AVAILABLE";
     this.currentRide = null;
     this.busyTimer = 0;
+    //ai aissisted timer for inactivity fire
     this.availableSince = (typeof simulation !== 'undefined' && simulation && simulation.timeManager)
       ? simulation.timeManager.getSimulationTime()
       : 0;
