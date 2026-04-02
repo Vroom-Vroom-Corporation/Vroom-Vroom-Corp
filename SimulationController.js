@@ -420,6 +420,7 @@ class SimulationController {
     const pendingCustomers = [];
     const matchedCustomers = [];
     const travelingCustomers = [];
+    const expiredCustomers = [];
     const allDrivers = [];
 
     // Collect pending customers
@@ -443,6 +444,11 @@ class SimulationController {
       }
     });
 
+    // Collect expired customers
+    this.expiredRequests.traverse((customer) => {
+      expiredCustomers.push(customer);
+    });
+
     // Collect all drivers
     this.availableDrivers.traverse((driver) => {
       allDrivers.push(driver);
@@ -450,7 +456,7 @@ class SimulationController {
 
     // Update the UI manager
     if (this.uiManager) {
-      this.uiManager.updateCustomerList(pendingCustomers, matchedCustomers, travelingCustomers, this);
+      this.uiManager.updateCustomerList(pendingCustomers, matchedCustomers, travelingCustomers, expiredCustomers, this);
       this.uiManager.updateDriverList(allDrivers);
       this.uiManager.updateTimeDisplay(this.timeManager);
       this.uiManager.updateEventLog(this.eventLog);

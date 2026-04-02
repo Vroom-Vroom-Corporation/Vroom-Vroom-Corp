@@ -133,7 +133,7 @@ class UIManager {// this page is ai assisted
     }
   }
 
-  updateCustomerList(pendingCustomers, matchedCustomers, travelingCustomers, simulation) {
+  updateCustomerList(pendingCustomers, matchedCustomers, travelingCustomers, expiredCustomers, simulation) {
     const listContainer = document.getElementById('customer-list');
     listContainer.innerHTML = '';
 
@@ -187,8 +187,22 @@ class UIManager {// this page is ai assisted
       listContainer.appendChild(travelingSection);
     }
 
+    // Display expired customers
+    if (expiredCustomers.length > 0) {
+      const expiredSection = document.createElement('div');
+      expiredSection.className = 'list-section';
+      expiredSection.innerHTML = '<h3 class="section-title">Expired</h3>';
+      
+      expiredCustomers.forEach((customer) => {
+        const card = this.createCustomerCard(customer, null); // No driver for expired
+        expiredSection.appendChild(card);
+      });
+      
+      listContainer.appendChild(expiredSection);
+    }
+
     // Show empty state if no customers
-    if (pendingCustomers.length === 0 && matchedCustomers.length === 0 && travelingCustomers.length === 0) {
+    if (pendingCustomers.length === 0 && matchedCustomers.length === 0 && travelingCustomers.length === 0 && expiredCustomers.length === 0) {
       listContainer.innerHTML = '<div class="empty-state">No active customers</div>';
     }
   }
@@ -248,6 +262,7 @@ class UIManager {// this page is ai assisted
     card.className = `item-card customer-card ${customer.status.toLowerCase()}`;
     
     const timeRemaining = Math.max(0, Math.ceil((customer.expireTime - millis()) / 1000));
+    const timeDisplay = customer.status === 'EXPIRED' ? 'Expired' : `${timeRemaining}s`;
     const driverInfo = driver 
       ? `<div class="driver-info"><strong>Driver:</strong> ${driver.id}</div>`
       : '<div class="driver-info no-driver">No driver assigned</div>';
@@ -274,7 +289,7 @@ class UIManager {// this page is ai assisted
           <strong>Destination:</strong> (${Math.round(customer.destination.x)}, ${Math.round(customer.destination.y)})
         </div>
         <div class="detail-row">
-          <strong>Time Left:</strong> ${timeRemaining}s
+          <strong>Time Left:</strong> ${timeDisplay}
         </div>
         ${driverInfo}
       </div>
