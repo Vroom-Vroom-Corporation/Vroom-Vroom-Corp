@@ -100,7 +100,7 @@ class SimulationController {
 
   monthlyHiring() {
     //every month, hire the avgrating # of drivers (rounded down) remove cost of hiring from earnings, add to expenses, then add new drivers to available drivers linked list
-    const driversToHire = 10; //may cahnge to fixed value 
+    const driversToHire = 5; //may cahnge to fixed value 
     for (let i = 0; i < driversToHire; i++) {
       const d = this.spawnRandomDriver();
       //basic 100. silver 500. gold 1000. platinum 5000.
@@ -164,7 +164,7 @@ class SimulationController {
     const ratingFactor = rating / 5; // normalize to 0..1 (assuming 5 is max rating)
 
     // combine base interval with rating factor; ensure it never goes below a minimum
-    const interval =( baseInterval / (1 + ratingFactor));
+    const interval =(( baseInterval / (1 + ratingFactor))/5);
     return Math.max(20, Math.round(interval));
   }
 
@@ -204,8 +204,7 @@ class SimulationController {
     //driver sort
     let bestDriver = null;
     let bestScore = -Infinity;
-    let bestDistanceScore = 0;
-    let bestAmenityScore = 0;
+  
     // Get the first available driver that can reach within time
     //limit to the x closest drivers, maybe conditional to rush hours
     // => means its a function
@@ -238,8 +237,7 @@ class SimulationController {
         if (currentscore > bestScore) {
           bestScore = currentscore;
           bestDriver = d;
-          bestDistanceScore = distanceScore;
-          bestAmenityScore = amenityScore;
+     
         }
         
         // go to next driver in the list and repeat, if driver next is false, return highest rated driver
