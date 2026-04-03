@@ -45,35 +45,42 @@ class TownMap {
     const date = this.timeManager.getCurrentDateTime();
     const [sunrise, sunset] = this.getSunTimes(date);
     
-    const currentHours = date.getHours() + date.getMinutes() / 60;
+    const currentHours = date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
     const fadeDurationHours = this.fadeDurationMinutes / 60;
     
-    // Fade in: from (sunset - fadeDuration/2) to (sunset + fadeDuration/2)
-    const sunsetFadeStart = sunset - fadeDurationHours / 2;
-    const sunsetFadeEnd = sunset + fadeDurationHours / 2;
+    // Sunset fade in: from (sunset - fadeDuration) to sunset (increases from 0 to 1)
+    const sunsetFadeStart = sunset - fadeDurationHours;
     
-    // Fade out: from (sunrise - fadeDuration/2) to (sunrise + fadeDuration/2)
-    const sunriseFadeStart = sunrise - fadeDurationHours / 2;
-    const sunriseFadeEnd = sunrise + fadeDurationHours / 2;
+    // Sunrise fade out: from sunrise to (sunrise + fadeDuration) (decreases from 1 to 0)
+    const sunriseFadeEnd = sunrise + fadeDurationHours;
     
-    // During sunset fade
-    if (currentHours >= sunsetFadeStart && currentHours <= sunsetFadeEnd) {
+    // During sunset fade in
+    if (currentHours >= sunsetFadeStart && currentHours < sunset) {
       const progress = (currentHours - sunsetFadeStart) / fadeDurationHours;
       return Math.min(1, Math.max(0, progress));
     }
     
-    // Full night
-    if (currentHours > sunsetFadeEnd && currentHours < sunriseFadeStart) {
+    // After sunset until sunrise (full night)
+    // Need to handle midnight wrap-around
+    if (currentHours >= sunset) {
+      // After sunset today, definitely night
       return 1;
     }
     
-    // During sunrise fade
-    if (currentHours >= sunriseFadeStart && currentHours <= sunriseFadeEnd) {
-      const progress = 1 - ((currentHours - sunriseFadeStart) / fadeDurationHours);
-      return Math.min(1, Math.max(0, progress));
+    // Before current sunrise (could be in morning fade or still night)
+    if (currentHours < sunriseFadeEnd) {
+      // If current time is less than sunrise fade end, we're in the fade out period
+      if (currentHours >= sunrise) {
+        // During sunrise fade out
+        const progress = 1 - ((currentHours - sunrise) / fadeDurationHours);
+        return Math.min(1, Math.max(0, progress));
+      } else {
+        // Before sunrise, so still full night
+        return 1;
+      }
     }
     
-    // Day
+    // After sunrise fade, it's day
     return 0;
   }
 

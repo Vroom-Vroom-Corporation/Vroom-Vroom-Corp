@@ -2,6 +2,7 @@ class UIManager {// this page is ai assisted
   constructor() {
     this.sidebarOpen = false;
     this.activeTab = 'customers'; // 'customers', 'drivers', or 'company'
+    this.darkModeEnabled = false;
     this.initializeLeftSidebar();
     this.initializeRightSidebar();
   }
@@ -381,6 +382,14 @@ class UIManager {// this page is ai assisted
     }
   }
 
+  updateCompanyLogoForDarkMode(isDarkMode) {
+    this.darkModeEnabled = isDarkMode;
+    const logoImg = document.querySelector('.company-logo-placeholder img');
+    if (logoImg) {
+      logoImg.src = isDarkMode ? 'Data/vrmlogodrk.png' : 'Data/vrmlogo.png';
+    }
+  }
+
   updateCompanyInfo(companyData) {
     const companyContainer = document.getElementById('company-info');
     if (!companyContainer) return;
@@ -388,7 +397,7 @@ class UIManager {// this page is ai assisted
     companyContainer.innerHTML = `
       <div class="company-header">
         <div class="company-logo-placeholder">
-          <img src="Data/vrmlogo.png" alt="Vroom Vroom Corporation Logo" />
+          <img src="Data/${this.darkModeEnabled ? 'vrmlogodrk' : 'vrmlogo'}.png" alt="Vroom Vroom Corporation Logo" />
         </div>
       </div>
       

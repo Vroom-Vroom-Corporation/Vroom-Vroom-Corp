@@ -4,6 +4,8 @@ let mapviewNight;
 let timescaleValues = [0.1, 0.5, 1, 1.5, 2, 5, 10];
 let currentTimescaleIndex = 2; // start at 1
 let timescaleButton;
+let darkModeToggle;
+let darkModeEnabled = false;
 //let car;
 function preload() {
   // make sure the path matches where the file actually lives; the image
@@ -21,7 +23,7 @@ function setup() {
 
   simulation = new SimulationController(width, height);
   
-  // Pass night map and timeManager to TownMap for day/night transitions
+  // Pass night map and timeManager to TownMap for day/night transitions ai assisted
   simulation.map.setNightMap(mapviewNight, simulation.timeManager);
 //ai assisted time scale ui
   // Set initial timescale
@@ -35,6 +37,23 @@ function setup() {
     let newScale = timescaleValues[currentTimescaleIndex];
     simulation.timeManager.setTimeScale(newScale);
     timescaleButton.html('Timescale: ' + newScale + 'x');
+  });
+  
+  // Create dark mode toggle button in bottom left ai assesited
+  darkModeToggle = createButton('🌓 Dark Mode');
+  darkModeToggle.position(10, height - 40);
+  darkModeToggle.mousePressed(() => {
+    darkModeEnabled = !darkModeEnabled;
+    const body = document.body;
+    if (darkModeEnabled) {
+      body.classList.add('dark-mode');
+      darkModeToggle.html('☀️ Light Mode');
+      simulation.uiManager.updateCompanyLogoForDarkMode(true);
+    } else {
+      body.classList.remove('dark-mode');
+      darkModeToggle.html('🌓 Dark Mode');
+      simulation.uiManager.updateCompanyLogoForDarkMode(false);
+    }
   });
 }
 
