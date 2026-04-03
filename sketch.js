@@ -1,5 +1,6 @@
 let simulation;
 let mapview;
+let mapviewNight;
 let timescaleValues = [0.1, 0.5, 1, 1.5, 2, 5, 10];
 let currentTimescaleIndex = 2; // start at 1
 let timescaleButton;
@@ -8,6 +9,7 @@ function preload() {
   // make sure the path matches where the file actually lives; the image
   // was placed in the Data folder so include that in the relative path
   mapview = loadImage("Data/manhatmap.png");
+  mapviewNight = loadImage("Data/manhatmapnightview.png");
 }
 function setup() {
 
@@ -18,6 +20,9 @@ function setup() {
   car = new Driver(0, createVector(400, 300));
 
   simulation = new SimulationController(width, height);
+  
+  // Pass night map and timeManager to TownMap for day/night transitions
+  simulation.map.setNightMap(mapviewNight, simulation.timeManager);
 //ai assisted time scale ui
   // Set initial timescale
   simulation.timeManager.setTimeScale(timescaleValues[currentTimescaleIndex]);

@@ -388,9 +388,8 @@ class UIManager {// this page is ai assisted
     companyContainer.innerHTML = `
       <div class="company-header">
         <div class="company-logo-placeholder">
-          <div class="logo-placeholder">LOGO</div>
+          <img src="Data/vrmlogo.png" alt="Vroom Vroom Corporation Logo" />
         </div>
-        <h2 class="company-name">Vroom Vroom Corporation</h2>
       </div>
       
       <div class="financial-summary">
