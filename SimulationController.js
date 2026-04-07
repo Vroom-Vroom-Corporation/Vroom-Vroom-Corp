@@ -10,6 +10,7 @@ class SimulationController {
     this.pendingRequests = new LinkedList();
     this.activeMatches = new LinkedList();
     this.expiredRequests = new LinkedList();
+    this.firedDrivers = new LinkedList();
     this.eventLog = new LinkedList(); //event log might incude active and expired requests, or we can have separate logs for each
     this.eventLogSize = 0;
     this.maxEventLogSize = 50;
@@ -76,27 +77,29 @@ class SimulationController {
     this.renderHUD();
   }
   //hire and fire drivers at the end of each month based on profit and satisfaction
+  fireDriver(driver, reason) {
+    if (!driver) return;
+    const removed = this.availableDrivers.delete((d) => d.id === driver.id);
+    if (!removed) return;
+    driver.status = "FIRED";
+    driver.fireReason = reason;
+    this.firedDrivers.insert(driver);
+    this.addEvent(driver.id, reason);
+  }
+
   MassLayoffs() {
     this.availableDrivers.traverse((driver) => {
-      if (driver) {
-    //fire if negative rating after 10 rides
-    if (driver.avgrating < 2 && driver.totalrides >= 10) {
-      this.availableDrivers.delete((d) => d.id === driver.id);
-      this.addEvent(driver.id, "Fired due to low rating");
-      console.log(driver.id, "fired due to low rating:", driver.avgrating, "after", driver.totalrides, "rides");
-    }
-    //fire if under average after 20
-    if (driver.avgrating < this.VroomVroomCorp.avgrating && driver.totalrides >= 20) {
-      this.availableDrivers.delete((d) => d.id === driver.id);
-      this.addEvent(driver.id, "Fired due to below average rating");
-      console.log(driver.id, "fired due to below average rating:", driver.avgrating, "compared to company average of", this.VroomVroomCorp.avgrating, "after", driver.totalrides, "rides");
-    }
-    //Fire if inactive for a week
-    if (driver.status === "INACTIVE") {
-      this.availableDrivers.delete((d) => d.id === driver.id);
-      this.addEvent(driver.id, "Fired due to inactivity");
-      console.log(driver.id, "fired due to inactivity");
-    }
+      if (!driver) return;
+
+      if (driver.avgrating < 2 && driver.totalrides >= 10) {
+        this.fireDriver(driver, "Fired due to low rating");
+        console.log(driver.id, "fired due to low rating:", driver.avgrating, "after", driver.totalrides, "rides");
+      } else if (driver.avgrating < this.VroomVroomCorp.avgrating && driver.totalrides >= 20) {
+        this.fireDriver(driver, "Fired due to below average rating");
+        console.log(driver.id, "fired due to below average rating:", driver.avgrating, "compared to company average of", this.VroomVroomCorp.avgrating, "after", driver.totalrides, "rides");
+      } else if (driver.status === "INACTIVE") {
+        this.fireDriver(driver, "Fired due to inactivity");
+        console.log(driver.id, "fired due to inactivity");
       }
     });
   }
@@ -195,7 +198,7 @@ class SimulationController {
 
 csorttimer(requestCount) {
   // every 50 requests, sort customers based on priority once per 50-request milestone
-  if (requestCount > 0 && requestCount % 5 === 0 && requestCount > this.lastCustomerSortCount) {
+  if (requestCount > 0 && requestCount % 50 === 0 && requestCount > this.lastCustomerSortCount) {
     this.customersort();
     this.lastCustomerSortCount = requestCount;
     console.log("customerssorted");
@@ -216,7 +219,7 @@ customersort()
 {
   // every 50 requests (configurable), order passengers to prioritize higher paying and more needy
   // priority sub tier > time until expiry > passenger count > amenity count
-  // quicksort implimentation from ai
+  // quicksort implimentation from ai (stole this from tony hoerr himselve)
   const items = [];
   this.pendingRequests.traverse((customer) => {
     items.push(customer);
@@ -282,7 +285,6 @@ customersort()
 
   processMatching() {
     // Get the first pending customer
-    //sort customer by priority here
     this.pendingRequests.traverse((customer) => {
     //prioritize hier teir cousmuers, customer sort here
     if (!customer || customer.status !== "PENDING") return; // no pending requests
@@ -539,10 +541,15 @@ customersort()
       allDrivers.push(driver);
     });
 
+    const firedDrivers = [];
+    this.firedDrivers.traverse((driver) => {
+      firedDrivers.push(driver);
+    });
+
     // Update the UI manager
     if (this.uiManager) {
       this.uiManager.updateCustomerList(pendingCustomers, matchedCustomers, travelingCustomers, expiredCustomers, this);
-      this.uiManager.updateDriverList(allDrivers);
+      this.uiManager.updateDriverList(allDrivers, firedDrivers);
       this.uiManager.updateTimeDisplay(this.timeManager);
       this.uiManager.updateEventLog(this.eventLog);
       

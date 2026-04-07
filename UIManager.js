@@ -188,13 +188,14 @@ class UIManager {// this page is ai assisted
       listContainer.appendChild(travelingSection);
     }
 
-    // Display expired customers
+    // Display expired customers (latest 50 only)
     if (expiredCustomers.length > 0) {
+      const latestExpired = expiredCustomers.slice(Math.max(0, expiredCustomers.length - 50));
       const expiredSection = document.createElement('div');
       expiredSection.className = 'list-section';
-      expiredSection.innerHTML = '<h3 class="section-title">Expired</h3>';
+      expiredSection.innerHTML = `<h3 class="section-title">Expired</h3>${expiredCustomers.length > 50 ? `<div class="section-subtitle">Showing latest 50 of ${expiredCustomers.length}</div>` : ''}`;
       
-      expiredCustomers.forEach((customer) => {
+      latestExpired.forEach((customer) => {
         const card = this.createCustomerCard(customer, null); // No driver for expired
         expiredSection.appendChild(card);
       });
@@ -208,7 +209,7 @@ class UIManager {// this page is ai assisted
     }
   }
 
-  updateDriverList(allDrivers) {
+  updateDriverList(allDrivers, firedDrivers = []) {
     const listContainer = document.getElementById('driver-list');
     listContainer.innerHTML = '';
 
@@ -252,8 +253,22 @@ class UIManager {// this page is ai assisted
       listContainer.appendChild(busySection);
     }
 
+    // Display fired drivers
+    if (firedDrivers.length > 0) {
+      const firedSection = document.createElement('div');
+      firedSection.className = 'list-section';
+      firedSection.innerHTML = '<h3 class="section-title">Fired Drivers</h3>';
+
+      firedDrivers.forEach((driver) => {
+        const card = this.createDriverCard(driver);
+        firedSection.appendChild(card);
+      });
+
+      listContainer.appendChild(firedSection);
+    }
+
     // Show empty state
-    if (allDrivers.length === 0) {
+    if (allDrivers.length === 0 && firedDrivers.length === 0) {
       listContainer.innerHTML = '<div class="empty-state">No drivers available</div>';
     }
   }
@@ -338,6 +353,7 @@ class UIManager {// this page is ai assisted
         <div class="detail-row">
           <strong>Last Rating:</strong> ${isNaN(driver.lastRating) ? 'N/A' : driver.lastRating.toFixed(2)}
         </div>
+        ${driver.fireReason ? `<div class="detail-row"><strong>Fired Reason:</strong> ${driver.fireReason}</div>` : ''}
         ${customerInfo}
       </div>
     `;
