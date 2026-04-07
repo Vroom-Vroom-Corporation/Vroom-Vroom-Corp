@@ -5,7 +5,9 @@ class TownMap {
     this.gridSize = gridSize;
     this.thermounclearbomb = 0;
     
+    //ai assisted
     // Sunset/Sunrise times for 2026 (month: [sunrise in hours, sunset in hours]) sunset/sunrise timers are ai assisted based on real world data for NYC in 2026, with a 60 minute fade duration for day/night transition
+   //source https://www.timeanddate.com/sun/usa/new-york
     this.sunTimes = {
       0: [7 + 15/60, 17 + 0/60],      // January
       1: [6 + 50/60, 17 + 40/60],     // February
@@ -39,6 +41,7 @@ class TownMap {
   
   // Get current fade alpha (0 = day, 1 = night)
   // Returns how much night to show (0-1)
+  //ai aissisted
   getNightAlpha(currentTime) {
     if (!this.timeManager) return 0;
     
@@ -89,6 +92,7 @@ class TownMap {
       x: floor(random(this.width / this.gridSize)) * this.gridSize + this.gridSize / 2,
       y: floor(random(this.height / this.gridSize)) * this.gridSize + this.gridSize / 2
     };
+    //eventually return set locations at a set chance based of time of day
   }
 //hi andre  
   getDistance(loc1, loc2) {
