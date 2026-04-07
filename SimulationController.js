@@ -13,7 +13,8 @@ class SimulationController {
     this.eventLog = new LinkedList(); //event log might incude active and expired requests, or we can have separate logs for each
     this.eventLogSize = 0;
     this.maxEventLogSize = 50;
-
+    this.requestcount = 0;
+    this.lastCustomerSortCount = 0;
     this.frameCounter = 0;
 
     this.driverCounter = 1;
@@ -44,6 +45,8 @@ class SimulationController {
     if (this.frameCounter % spawnInterval === 0) {
       this.spawnRandomCustomer();
     }
+
+    this.csorttimer(this.requestcount);
 
     this.updateDrivers();
     this.updateCustomers();
@@ -136,6 +139,7 @@ class SimulationController {
   }
 
   spawnRandomCustomer() {
+    this.requestcount++;
     const loc = this.map.getRandomLocation();
     const dest = this.map.getRandomLocation();
     const customer = new Customer("C" + this.customerCounter++, loc, dest, this.timeManager);
@@ -189,11 +193,92 @@ class SimulationController {
 //greater likelihood of a match early, lowering wait times
 //}
 
-//customersort()
-//{
-//every 50 (num can change) requests, order passengers to prioritize higher paying and more needy
-//prioirty sub tier > time until expiry > passenger count > amenity count
-//}
+csorttimer(requestCount) {
+  // every 50 requests, sort customers based on priority once per 50-request milestone
+  if (requestCount > 0 && requestCount % 5 === 0 && requestCount > this.lastCustomerSortCount) {
+    this.customersort();
+    this.lastCustomerSortCount = requestCount;
+    console.log("customerssorted");
+    //debugging
+      console.log("Customer list order:");
+  this.pendingRequests.traverse((customer) => {
+    console.log(` - ${customer.id}: ${customer.subscriptionPlan}, ${customer.expireTime}, ${customer.passengers}, ${customer.amenitiesRequired ? customer.amenitiesRequired.length : 0}`);
+  });
+  }
+  //every 50 passenger requests, sort customers based on priority
+  //priority sub tier > time until expiry > passenger count > amenity count
+  //log list order for debugging purposes
+
+
+}
+
+customersort()
+{
+  // every 50 requests (configurable), order passengers to prioritize higher paying and more needy
+  // priority sub tier > time until expiry > passenger count > amenity count
+  // quicksort implimentation from ai
+  const items = [];
+  this.pendingRequests.traverse((customer) => {
+    items.push(customer);
+  });
+
+  if (items.length <= 1) {
+    return;
+  }
+
+  const swap = (arr, i, j) => {
+    const temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  };
+
+  const shouldSwap = (left, right) => {
+    // TODO: replace this comparison logic with your own priority conditions.
+    // Return true when `left` should come before `right` in the sorted order.
+    //sub tier priority > time until expiry > passenger count > amenity count
+    if (left.subscriptionPlan !== right.subscriptionPlan) {
+      const tierPriority = { "PLATINUM": 4, "GOLD": 3, "SILVER": 2, "BASIC": 1, "POOR": 0 };
+      return (tierPriority[left.subscriptionPlan] || 0) > (tierPriority[right.subscriptionPlan] || 0);
+    } else if (left.expireTime !== right.expireTime) {
+      return left.expireTime < right.expireTime; // earlier expiry first
+    } else if (left.passengers !== right.passengers) {
+      return left.passengers > right.passengers; // more passengers first
+    } else {
+      const leftAmenities = left.amenitiesRequired ? left.amenitiesRequired.length : 0;
+      const rightAmenities = right.amenitiesRequired ? right.amenitiesRequired.length : 0;
+      return leftAmenities > rightAmenities; // more amenities first
+    } 
+
+  };
+
+  const partition = (arr, low, high) => {
+    const pivot = arr[high];
+    let i = low - 1;
+
+    for (let j = low; j < high; j++) {
+      if (shouldSwap(arr[j], pivot)) {
+        i += 1;
+        swap(arr, i, j);
+      }
+    }
+
+    swap(arr, i + 1, high);
+    return i + 1;
+  };
+
+  const quickSortRange = (arr, low, high) => {
+    if (low < high) {
+      const pivotIndex = partition(arr, low, high);
+      quickSortRange(arr, low, pivotIndex - 1);
+      quickSortRange(arr, pivotIndex + 1, high);
+    }
+  };
+
+  quickSortRange(items, 0, items.length - 1);
+
+  this.pendingRequests = new LinkedList();
+  items.forEach((customer) => this.pendingRequests.insert(customer));
+}
 
   processMatching() {
     // Get the first pending customer
@@ -267,7 +352,7 @@ class SimulationController {
         if (customer.status === "DELIVERED") {
         // Calculate fare based on distance and passengers
           const rawDistance = this.map.getDistance(customer.location, customer.destination);
-          const distance = isNaN(rawDistance) ? 0 : rawDistance;
+          const distance = isNaN(rawDistance) ? 0 : rawDistance; // ai debugging
         let score =0;
           let tips=0;
 
@@ -477,19 +562,5 @@ class SimulationController {
 
     this.eventLog.insert(event);
     this.eventLogSize++;
-
-    // If event log exceeds max size, remove the oldest (first) event
-    if (this.eventLogSize > this.maxEventLogSize) {
-      let firstEvent = null;
-      this.eventLog.head.data;
-      
-      // Get the first event to delete
-      if (this.eventLog.head) {
-        firstEvent = this.eventLog.head.data;
-        // Delete the first event by matching its reference
-        this.eventLog.delete((e) => e === firstEvent);
-        this.eventLogSize--;
-      }
-    }
   }
 }

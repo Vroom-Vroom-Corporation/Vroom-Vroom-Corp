@@ -369,8 +369,10 @@ class UIManager {// this page is ai assisted
       events.push(event);
     });
     
-    // Display newest events first
-    for (let i = events.length - 1; i >= 0; i--) {
+    const maxVisibleEvents = 50;
+    const startIndex = Math.max(0, events.length - maxVisibleEvents);
+    
+    for (let i = events.length - 1; i >= startIndex; i--) {
       const event = events[i];
       const eventElement = document.createElement('div');
       eventElement.className = 'event-item';

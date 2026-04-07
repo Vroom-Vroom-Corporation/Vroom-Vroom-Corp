@@ -117,6 +117,14 @@ class Driver {
         // Wrap destination as {location: {x, y}} for moveManhattan compatibility
         this.target = { location: passenger.destination };
         this.state = "TO_DESTINATION";
+        //ai assisted event logging
+
+        if (typeof simulation !== 'undefined' && typeof simulation.addEvent === 'function') {
+          const now = simulation.timeManager ? simulation.timeManager.getSimulationTime() : millis();
+          const remainingMs = Math.max(0, passenger.expireTime - now);
+          const remainingSeconds = Math.ceil(remainingMs / 1000);
+          simulation.addEvent("PICKUP", `${passenger.id} picked up by ${this.id} with ${remainingSeconds}s patience left`);
+        }
       }
     } else if (passenger.Pickedup && !passenger.atdestination) {
       if (this.atTarget()) {
