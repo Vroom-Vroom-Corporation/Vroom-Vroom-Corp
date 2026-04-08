@@ -384,11 +384,11 @@ customersort()
           }
           score += customer.driversatsfaction/5; // increase score based on driver satisfaction, max 5 points
             tips = isNaN(customer.driversatsfaction) ? 0 : customer.driversatsfaction; // tips based on driver satisfaction, max 10% of fare
-        const fare = baseFare + (distance/1000 * distanceRate) + ((isNaN(customer.passengers) ? 1 : customer.passengers) * passengerRate) + tips;
+        const fare = baseFare + (distance/1000 * distanceRate) + ((isNaN(customer.passengers) ? 1 : customer.passengers) * passengerRate) + tips; // ai assisted debugging
         // increased earnings amenities
         
         // Random ride time between 8-25 minutes
-        const rideTime = Math.random() * 17 + 8;
+        const rideTime = Math.random() * 17 + 8;// temp ride time for testing, might remove later
         
         // Complete the ride
         this.VroomVroomCorp.completeRide(fare, rideTime);
@@ -494,7 +494,7 @@ customersort()
         if (cust.status === "DELIVERED") {
           // Move to expiredRequests or event log as needed
           this.activeMatches.delete((c) => c.id === cust.id);
-          // this.expiredRequests.insert(cust); // if you want to keep track of delivered customers
+         
         }
 
       }
@@ -506,7 +506,7 @@ customersort()
     textSize(14);
     textAlign(LEFT);
     text("Vroom Vroom Corporation © 2026", 570, 25);
-    //ui here, maybe show number of pending requests, available drivers, etc.
+   
   }
 
   updateUI() { ///ai assisted
@@ -564,7 +564,7 @@ customersort()
       this.uiManager.updateCompanyInfo(this.VroomVroomCorp.getCompanyData());
     }
   }
-
+//ai assisted event logging system, logs important events like matches, expirations, hirings, firings, and rides with timestamps. This can be displayed in the UI for debugging and player information.
   addEvent(source, message) {
     const timestamp = this.timeManager.getFormattedDateTime();
     const event = {
