@@ -89,6 +89,11 @@ class SimulationController {
 
   MassLayoffs() {
     this.availableDrivers.traverse((driver) => {
+      //add cant fire drivers if list is at or under 5
+      if (this.availableDrivers.size() <= 5) {
+        return;
+      }
+
       if (!driver) return;
 
       if (driver.avgrating < 2 && driver.totalrides >= 10) {
@@ -399,7 +404,9 @@ customersort()
         if (customer.assignedDriver) {
           const driver = this.availableDrivers.search((d) => d.id === customer.assignedDriver.id);
           if (driver) {
+            //ai assisted documentation
             driver.totalrides = (driver.totalrides || 0) + 1;
+            //rating systme
             driver.numRatings++;
             driver.totalrating += score;
             driver.avgrating = driver.totalrating / driver.numRatings;
