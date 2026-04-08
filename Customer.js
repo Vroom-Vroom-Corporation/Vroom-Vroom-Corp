@@ -10,7 +10,7 @@ class Customer {
     this.requestTime = this.timeManager ? this.timeManager.getSimulationTime() : millis();
     this.amenitiesRequired = [];
 
-    this.amentiys = int(random(0,5));
+    this.amentiys = int(random(0,5)); // modify to ba more realistic
     for (let i = 0; i < this.amentiys; i++) 
     {
           this.want = int(random(0,5));
