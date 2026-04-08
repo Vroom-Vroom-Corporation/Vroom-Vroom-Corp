@@ -90,13 +90,13 @@ class SimulationController {
   MassLayoffs() {
     this.availableDrivers.traverse((driver) => {
       //add cant fire drivers if list is at or under 5
-      if (this.availableDrivers.size() <= 5) {
+      if (this.availableDrivers.size <= 5) {
         return;
       }
 
       if (!driver) return;
 
-      if (driver.avgrating < 2 && driver.totalrides >= 10) {
+      if (driver.avgrating < 2 && driver.totalrides >= 10) {//this should be compan rating
         this.fireDriver(driver, "Fired due to low rating");
         console.log(driver.id, "fired due to low rating:", driver.avgrating, "after", driver.totalrides, "rides");
       } else if (driver.avgrating < this.VroomVroomCorp.avgrating && driver.totalrides >= 20) {
