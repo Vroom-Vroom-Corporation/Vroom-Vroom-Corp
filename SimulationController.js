@@ -109,7 +109,7 @@ class SimulationController {
     });
   }
 
-  monthlyHiring() {
+  monthlyHiring() { //weekly now but whatever
     //every month, hire the avgrating # of drivers (rounded down) remove cost of hiring from earnings, add to expenses, then add new drivers to available drivers linked list
     const driversToHire = 5; //may cahnge to fixed value 
     for (let i = 0; i < driversToHire; i++) {
@@ -163,20 +163,19 @@ class SimulationController {
     const hour = this.timeManager.getHour();
     const isWeekday = this.timeManager.isWeekday();
 
-    // Peak hours: 7-9 AM (7:00-8:59) and 4-6 PM (16:00-17:59)
-    const isMorningPeak = hour >= 7 && hour < 9;
-    const isEveningPeak = hour >= 16 && hour < 18;
-
-    // base interval depends on peak vs off-peak
+    // Peak hours: 7-9 AM (7:00-9:59) and 4-6 PM (16:00-18:59)
+    const isMorningPeak = hour >= 7 && hour < 10;
+    const isEveningPeak = hour >= 16 && hour < 19;
+    //source https://www.daisylimo.com/blog/when-is-rush-hour-in-new-york-and-new-jersey/
+    // base interval depends on peak vs off-peak (ai assisted)
     const baseInterval = (isWeekday && (isMorningPeak || isEveningPeak)) ? 60 : 180;
 
     // adjust interval based on company average rating
     // higher rating -> more frequent spawns, lower rating -> slower spawns
     const rating = this.VroomVroomCorp.avgrating || 1; // avoid division by zero
-    const ratingFactor = rating / 5; // normalize to 0..1 (assuming 5 is max rating)
-
+    const ratingFactor = rating; 
     // combine base interval with rating factor; ensure it never goes below a minimum
-    const interval =(( baseInterval / (1 + ratingFactor))/5);
+    const interval =(( baseInterval / (1 + ratingFactor)));
     return Math.max(20, Math.round(interval));
   }
 
