@@ -50,9 +50,8 @@ class Customer {
     this.atdestination = false;
     //random expire time in real millis, converted to sim time
     let expireDelay = int(random(30000, 90000)); // 30-90 real seconds
-    if (this.timeManager) {
-      expireDelay = Math.round(expireDelay / this.timeManager.getTimeScale());
-    }
+    // expireTime is calculated in simulation time
+    // timeScale is already factored into getSimulationTime(), so we don't divide by it here
     this.expireTime = this.requestTime + expireDelay * (this.timeManager ? this.timeManager.simulationSpeed : 1000);
     this.assignedDriver = null; // will store driver object when matched
     // face image, subscrip plan ap ayp check canva
