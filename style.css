@@ -12,6 +12,34 @@ canvas {
   padding: 0;
 }
 
+/* Button defaults */
+button {
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 10px 16px;
+  min-height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  font-size: 14px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+button:hover {
+  background-color: #f4f4f4;
+}
+
+button:active {
+  background-color: #e8e8e8;
+}
+
 /* Sidebar Styles */
 .sidebar {
   position: fixed;
@@ -572,11 +600,13 @@ canvas {
 }
 
 /* ============ DARK MODE STYLES ============ */
+html.dark-mode,
 body.dark-mode {
   background-color: #1a1a1a;
   color: #f5f5f5;
 }
 
+html.dark-mode canvas,
 body.dark-mode canvas {
   background-color: #1a1a1a !important;
 }
@@ -814,6 +844,11 @@ body.dark-mode .no-data {
 
 /* Dark Mode Button Styling */
 body.dark-mode button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  line-height: 1.2;
   background-color: #2a2a2a;
   color: #f5f5f5;
   border: 1px solid #444;

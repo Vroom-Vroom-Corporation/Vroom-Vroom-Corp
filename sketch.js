@@ -45,12 +45,15 @@ function setup() {
   darkModeToggle.mousePressed(() => {
     darkModeEnabled = !darkModeEnabled;
     const body = document.body;
+    const html = document.documentElement;
     if (darkModeEnabled) {
       body.classList.add('dark-mode');
+      html.classList.add('dark-mode');
       darkModeToggle.html('☀️ Light Mode');
       simulation.uiManager.updateCompanyLogoForDarkMode(true);
     } else {
       body.classList.remove('dark-mode');
+      html.classList.remove('dark-mode');
       darkModeToggle.html('🌓 Dark Mode');
       simulation.uiManager.updateCompanyLogoForDarkMode(false);
     }
