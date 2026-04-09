@@ -3,7 +3,6 @@ class UIManager {// this page is ai assisted
     this.sidebarOpen = false;
     this.activeTab = 'customers'; // 'customers', 'drivers', or 'company'
     this.darkModeEnabled = false;
-    this.showCustomerDriverUI = true;
     this.initializeLeftSidebar();
     this.initializeRightSidebar();
   }
@@ -30,18 +29,12 @@ class UIManager {// this page is ai assisted
         <button class="tab-btn" data-tab="drivers">Drivers</button>
         <button class="tab-btn" data-tab="company">Company</button>
       </div>
-      <button id="ui-visibility-toggle" class="ui-toggle-btn">Hide Customer/Driver UI</button>
     `;
     
     // Add click handlers to tabs
     header.querySelectorAll('.tab-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
     });
-
-    const uiToggleBtn = header.querySelector('#ui-visibility-toggle');
-    if (uiToggleBtn) {
-      uiToggleBtn.addEventListener('click', () => this.toggleCustomerDriverUI());
-    }
     
     // Create content container
     const contentContainer = document.createElement('div');
@@ -125,8 +118,6 @@ class UIManager {// this page is ai assisted
         list.style.display = 'none';
       }
     });
-
-    this.updateCustomerDriverUIVisibility();
   }
 
   toggleSidebar() {
@@ -143,34 +134,8 @@ class UIManager {// this page is ai assisted
     }
   }
 
-  toggleCustomerDriverUI() {
-    this.showCustomerDriverUI = !this.showCustomerDriverUI;
-    this.updateCustomerDriverUIVisibility();
-  }
-
-  updateCustomerDriverUIVisibility() {
-    const customerList = document.getElementById('customer-list');
-    const driverList = document.getElementById('driver-list');
-    const uiToggleBtn = document.getElementById('ui-visibility-toggle');
-    const visible = this.showCustomerDriverUI;
-
-    if (customerList) {
-      customerList.style.display = visible && this.activeTab === 'customers' ? 'flex' : 'none';
-    }
-    if (driverList) {
-      driverList.style.display = visible && this.activeTab === 'drivers' ? 'flex' : 'none';
-    }
-    if (uiToggleBtn) {
-      uiToggleBtn.textContent = visible ? 'Hide Customer/Driver UI' : 'Show Customer/Driver UI';
-    }
-  }
-
   updateCustomerList(pendingCustomers, matchedCustomers, travelingCustomers, expiredCustomers, simulation) {
     const listContainer = document.getElementById('customer-list');
-    if (!this.showCustomerDriverUI) {
-      if (listContainer) listContainer.innerHTML = '';
-      return;
-    }
     listContainer.innerHTML = '';
 
     // Display pending (unmatched) customers
@@ -246,10 +211,6 @@ class UIManager {// this page is ai assisted
 
   updateDriverList(allDrivers, firedDrivers = []) {
     const listContainer = document.getElementById('driver-list');
-    if (!this.showCustomerDriverUI) {
-      if (listContainer) listContainer.innerHTML = '';
-      return;
-    }
     listContainer.innerHTML = '';
 
     // Group drivers by status
