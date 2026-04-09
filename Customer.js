@@ -49,7 +49,7 @@ class Customer {
     this.Pickedup = false;
     this.atdestination = false;
     //random expire time in real millis, converted to sim time
-    let expireDelay = int(random(30000, 90000)); // 30-90 real seconds
+    let expireDelay = 30000; // 30 real seconds
     // expireTime is calculated in simulation time
     // timeScale is already factored into getSimulationTime(), so we don't divide by it here
     this.expireTime = this.requestTime + expireDelay * (this.timeManager ? this.timeManager.simulationSpeed : 1000);
@@ -83,7 +83,7 @@ class Customer {
   }
 
 
-  display() {
+  display(showLabels = true) {
    
 
     if (this.status === "PENDING") {
@@ -92,29 +92,35 @@ class Customer {
     rect(this.location.x, this.location.y, 18, 18);
     
         fill(255);
-    textSize(10);
-    textAlign(CENTER);
-    text(this.id, this.location.x, this.location.y - 14);
-        text(this.passengers, this.location.x, this.location.y + 14);
-        text(Math.max(0, Math.ceil((this.expireTime - this.timeManager.getSimulationTime()) / this.timeManager.simulationSpeed / 1000)), this.location.x-15, this.location.y );
+    if (showLabels) {
+      textSize(10);
+      textAlign(CENTER);
+      text(this.id, this.location.x, this.location.y - 14);
+          text(this.passengers, this.location.x, this.location.y + 14);
+          text(Math.max(0, Math.ceil((this.expireTime - this.timeManager.getSimulationTime()) / this.timeManager.simulationSpeed / 1000)), this.location.x-15, this.location.y );
+    }
     } else if (this.status === "MATCHED") {
       fill(255, 100, 100);
       rectMode(CENTER);
       rect(this.location.x, this.location.y, 18, 18);
           fill(255);
-    textSize(10);
-    textAlign(CENTER);
-    text(this.id, this.location.x, this.location.y - 14);
-        text(this.passengers, this.location.x, this.location.y + 14);
-                text(Math.max(0, Math.ceil((this.expireTime - this.timeManager.getSimulationTime()) / this.timeManager.simulationSpeed / 1000)), this.location.x-15, this.location.y );
+    if (showLabels) {
+      textSize(10);
+      textAlign(CENTER);
+      text(this.id, this.location.x, this.location.y - 14);
+          text(this.passengers, this.location.x, this.location.y + 14);
+                  text(Math.max(0, Math.ceil((this.expireTime - this.timeManager.getSimulationTime()) / this.timeManager.simulationSpeed / 1000)), this.location.x-15, this.location.y );
+    }
     }  else if (this.status === "TRAVELLING") {
       fill(255);
       rectMode(CENTER);
       rect(this.destination.x, this.destination.y, 18, 18);
           fill(255);
-    textSize(10);
-    textAlign(CENTER);
-    text(this.id, this.destination.x, this.destination.y - 14);
+    if (showLabels) {
+      textSize(10);
+      textAlign(CENTER);
+      text(this.id, this.destination.x, this.destination.y - 14);
+    }
     }  else if (this.status === "EXPIRED") {
       fill(150);
       rectMode(CENTER);

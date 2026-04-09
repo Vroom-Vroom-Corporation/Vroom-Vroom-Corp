@@ -22,6 +22,8 @@ class SimulationController {
     this.customerCounter = 1;
     this.lastMonthlyHiringTime = this.timeManager.getSimulationTime();
     this.uiManager = new UIManager();
+    this.showDriverLabels = true;
+    this.showCustomerLabels = true;
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
     for (let i = 0; i < 10; i++) {
@@ -460,7 +462,7 @@ customersort()
             text(`Rides: ${driver.totalrides}`, driver.location.x + 15, driver.location.y + 20);
           }
 
-        driver.display();
+        driver.display(this.showDriverLabels);
 
       }
     });
@@ -479,7 +481,7 @@ customersort()
             //
           }
 
-        cust.display();
+        cust.display(this.showCustomerLabels);
 
       }
     });
@@ -490,7 +492,7 @@ customersort()
         this.activeMatches.delete((c) => c.id === cust.id);
       }
       if (cust && typeof cust.display === "function") {
-        cust.display();
+        cust.display(this.showCustomerLabels);
         if (cust.status === "DELIVERED") {
           // Move to expiredRequests or event log as needed
           this.activeMatches.delete((c) => c.id === cust.id);

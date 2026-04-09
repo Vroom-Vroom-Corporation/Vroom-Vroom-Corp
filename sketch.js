@@ -5,6 +5,8 @@ let timescaleValues = [0.1, 0.5, 1, 1.5, 2, 5, 10];
 let currentTimescaleIndex = 2; // start at 1
 let timescaleButton;
 let darkModeToggle;
+let driverLabelsToggle;
+let customerLabelsToggle;
 let darkModeEnabled = false;
 //let car;
 function preload() {
@@ -41,7 +43,7 @@ function setup() {
   
   // Create dark mode toggle button in bottom left ai assesited
   darkModeToggle = createButton('🌓 Dark Mode');
-  darkModeToggle.position(10, height - 40);
+  darkModeToggle.position(10, height - 120);
   darkModeToggle.mousePressed(() => {
     darkModeEnabled = !darkModeEnabled;
     const body = document.body;
@@ -57,6 +59,21 @@ function setup() {
       darkModeToggle.html('🌓 Dark Mode');
       simulation.uiManager.updateCompanyLogoForDarkMode(false);
     }
+  });
+
+  // Create label visibility toggles below the map
+  driverLabelsToggle = createButton('Hide Driver Labels');
+  driverLabelsToggle.position(10, height + 10);
+  driverLabelsToggle.mousePressed(() => {
+    simulation.showDriverLabels = !simulation.showDriverLabels;
+    driverLabelsToggle.html(simulation.showDriverLabels ? 'Hide Driver Labels' : 'Show Driver Labels');
+  });
+
+  customerLabelsToggle = createButton('Hide Customer Labels');
+  customerLabelsToggle.position(10, height + 50);
+  customerLabelsToggle.mousePressed(() => {
+    simulation.showCustomerLabels = !simulation.showCustomerLabels;
+    customerLabelsToggle.html(simulation.showCustomerLabels ? 'Hide Customer Labels' : 'Show Customer Labels');
   });
 }
 

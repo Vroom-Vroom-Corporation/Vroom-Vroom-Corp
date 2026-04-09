@@ -184,7 +184,7 @@ moveManhattan() {
     );
     return distance < 5;
   }
-  display() {
+  display(showLabels = true) {
       fill(
       this.state === "IDLE"
         ? "white"
@@ -231,12 +231,14 @@ moveManhattan() {
     } else if (this.cartier === 4) {
       fill(168, 190, 255); // Platinum
     }
-    textSize(10);
-    textAlign(CENTER);
-    text(this.id, this.location.x, this.location.y - 15);
-    //capacity on the right, speed on the left, total rides below
-    text("C:" + this.capacity, this.location.x + 15, this.location.y);
-    text("S:" + this.speed, this.location.x - 15, this.location.y);
-    text("R:" + (this.totalrides || 0), this.location.x, this.location.y + 15);
+    if (showLabels) {
+      textSize(10);
+      textAlign(CENTER);
+      text(this.id, this.location.x, this.location.y - 15);
+      //capacity on the right, speed on the left, total rides below
+      text("C:" + this.capacity, this.location.x + 15, this.location.y);
+      text("S:" + this.speed, this.location.x - 15, this.location.y);
+      text("R:" + (this.totalrides || 0), this.location.x, this.location.y + 15);
+    }
   }
 }
