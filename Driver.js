@@ -8,7 +8,20 @@ class Driver {
     this.avgrating = 0;
     this.lastRating = 0; // most recent rating
     this.speed = int(random(1, 5)); // unique speed for each driver
-    this.cartier = int(random(1, 5));
+    this.chance = int (random(0,100));
+    this.cartier;
+    //80 basic 15 silver 4 gold 1 platinum
+    if(this.chance <= 1){
+      cartier = 4;
+    } else if(this.chance > 1 && this.chance <= 5){
+      cartier = 3;
+    } else if(this.chance > 5 && this.chance <= 20){
+      cartier = 2;
+    } else {
+      cartier = 1;
+    }
+   
+
     // this.amenities = null;
     if (locationX instanceof p5.Vector) {
       // copy so external changes don't affect internal state
