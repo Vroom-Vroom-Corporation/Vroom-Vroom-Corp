@@ -24,13 +24,18 @@ class SimulationController {
     this.uiManager = new UIManager();
     this.showDriverLabels = true;
     this.showCustomerLabels = true;
+    //ai assisted
+    this.showVisualizations = true;
+    //ai assisted
+    this.debugMode = false;
+    this.lastMatchTime = 0;
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 1000; i++) {
           this.spawnRandomDriver();
     }
     //test case for spawning customers at start
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 1000; i++) {
       this.spawnRandomCustomer();
     }
        
@@ -39,7 +44,8 @@ class SimulationController {
 
   update() {
     this.frameCounter++;
-    this.MassLayoffs();
+    //note: keep drivers constant for now
+    //this.MassLayoffs();
     // Calculate dynamic spawn interval based on current time
     const baseSpawnInterval = this.calculateSpawnInterval();
     const timeScale = this.timeManager.getTimeScale();
@@ -64,7 +70,8 @@ class SimulationController {
     const currentSimTime = this.timeManager.getSimulationTime();
     const weekMs = 7 * 24 * 60 * 60 * 1000;
     if (currentSimTime - this.lastMonthlyHiringTime >= weekMs) { // 15 day timer is ai assisted
-      this.monthlyHiring();
+      //keep drivers constant for now
+      //this.monthlyHiring();
       // Keep the next cycle aligned to 15 days. If we are far past one or more cycles, catch up.
       const cyclesPassed = Math.floor((currentSimTime - this.lastMonthlyHiringTime) / weekMs);
       this.lastMonthlyHiringTime += cyclesPassed * weekMs;
@@ -73,10 +80,17 @@ class SimulationController {
   }
 
   display() {
+    if (!this.showVisualizations) {
+      // Still show debug info even when visualizations are hidden
+      this.renderDebugInfo();
+      return;
+    }
     this.map.drawGrid();
     this.renderDrivers();
     this.renderCustomers();
     this.renderHUD();
+    // Draw debug info last so it's on top
+    this.renderDebugInfo();
   }
   //hire and fire drivers at the end of each month based on profit and satisfaction
   fireDriver(driver, reason) {
@@ -290,6 +304,7 @@ customersort()
 }
 
   processMatching() {
+    const startTime = performance.now();
     // Get the first pending customer
     this.pendingRequests.traverse((customer) => {
     //prioritize hier teir cousmuers, customer sort here
@@ -350,6 +365,8 @@ customersort()
       this.activeMatches.insert(customer);
     }
     });
+    const endTime = performance.now();
+    this.lastMatchTime = endTime - startTime;
   }
 
 //monee
@@ -509,6 +526,29 @@ customersort()
     textAlign(LEFT);
     text("Vroom Vroom Corporation © 2026", 570, 25);
    
+  }
+
+  renderDebugInfo() {//ai asisst
+    if (!this.debugMode) return;
+    
+    // Save current drawing state
+    push();
+    
+    // Position in top right corner
+    const x = width - 310; // 300px width + 10px margin from right edge
+    const y = 25;
+    
+    // Draw debug text with black outline for visibility
+    fill(255, 0, 0); // red text
+    stroke(0); // black outline
+    strokeWeight(3);
+    textSize(14);
+    textAlign(LEFT);
+    text(`Last match time: ${this.lastMatchTime.toFixed(2)}ms`, x + 10, y + 20);
+    text(`Debug: ${this.pendingRequests.size} pending, ${this.availableDrivers.size} drivers`, x + 10, y + 40);
+    
+    // Restore drawing state
+    pop();
   }
 
   updateUI() { ///ai assisted

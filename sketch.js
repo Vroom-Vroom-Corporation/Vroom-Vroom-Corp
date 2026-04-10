@@ -7,6 +7,8 @@ let timescaleButton;
 let darkModeToggle;
 let driverLabelsToggle;
 let customerLabelsToggle;
+let hideVisualizationsToggle;
+let debugModeToggle;
 let darkModeEnabled = false;
 //let car;
 function preload() {
@@ -74,6 +76,23 @@ function setup() {
   customerLabelsToggle.mousePressed(() => {
     simulation.showCustomerLabels = !simulation.showCustomerLabels;
     customerLabelsToggle.html(simulation.showCustomerLabels ? 'Hide Customer Labels' : 'Show Customer Labels');
+  });
+  //ai assisted
+
+  // Create hide all visualizations toggle
+  hideVisualizationsToggle = createButton('Hide All Visualizations');
+  hideVisualizationsToggle.position(10, height + 90);
+  hideVisualizationsToggle.mousePressed(() => {
+    simulation.showVisualizations = !simulation.showVisualizations;
+    hideVisualizationsToggle.html(simulation.showVisualizations ? 'Hide All Visualizations' : 'Show All Visualizations');
+  });
+
+  // Create debug mode toggle
+  debugModeToggle = createButton('Enable Debug Mode');
+  debugModeToggle.position(10, height + 130);
+  debugModeToggle.mousePressed(() => {
+    simulation.debugMode = !simulation.debugMode;
+    debugModeToggle.html(simulation.debugMode ? 'Disable Debug Mode' : 'Enable Debug Mode');
   });
 }
 
