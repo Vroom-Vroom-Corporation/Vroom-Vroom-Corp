@@ -44,6 +44,7 @@ class SimulationController {
 
   update() {
     this.frameCounter++;
+      this.spawnRandomCustomer();
     //note: keep drivers constant for now
     //this.MassLayoffs();
     // Calculate dynamic spawn interval based on current time
@@ -365,6 +366,7 @@ customersort()
       this.activeMatches.insert(customer);
     }
     });
+    //ai assisded data alansiis
     const endTime = performance.now();
     this.lastMatchTime = endTime - startTime;
   }
