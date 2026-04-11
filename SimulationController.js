@@ -35,9 +35,9 @@ class SimulationController {
           this.spawnRandomDriver();
     }
     //test case for spawning customers at start
-    for (let i = 0; i < 1000; i++) {
-      this.spawnRandomCustomer();
-    }
+    // for (let i = 0; i < 1000; i++) {
+    //   this.spawnRandomCustomer();
+    // }
        
             
   }
@@ -207,6 +207,13 @@ class SimulationController {
     this.activeMatches.traverse((customer) => customer.update());
     this.handleRideCompletions();
     this.handleExpirations();
+        this.pendingRequests.traverse((customer) => {
+      if (customer.status === "EXPIRED") {
+        this.expiredRequests.insert(customer);
+        this.pendingRequests.delete((c) => c.id === customer.id);
+        this.addEvent("EXPIRE", `Request ${customer.id} expired without match`);
+      }
+    });
   }
 
 //driversort()
@@ -303,6 +310,19 @@ customersort()
   this.pendingRequests = new LinkedList();
   items.forEach((customer) => this.pendingRequests.insert(customer));
 }
+//ai assisted sorting algoritm for distance
+  findClosestDrivers(customerLocation, limit = 10) {
+    const candidates = [];
+    this.availableDrivers.traverse((driver) => {
+      if (driver.status !== "AVAILABLE") return;
+      const distance = this.map.getDistance(driver.location, customerLocation);
+      candidates.push({ driver, distance });
+    });
+    // Sort by distance ascending
+    candidates.sort((a, b) => a.distance - b.distance);
+    // Return top limit drivers
+    return candidates.slice(0, limit).map(c => c.driver);
+  }
 
   processMatching() {
     const startTime = performance.now();
@@ -317,42 +337,42 @@ customersort()
     // Get the first available driver that can reach within time
     //limit to the x closest drivers, maybe conditional to rush hours
     // => means its a function
-     this.availableDrivers.traverse(
-      (d) => {
-        if (d.status !== "AVAILABLE") return;
-        if (d.capacity < customer.passengers) return; // capacity check
-        //time check
-        let distance = this.map.getDistance(d.location, customer.location);
-        const now = this.timeManager.getSimulationTime();
-        let remaining_ms = customer.expireTime - now;
-        const traveltime = (distance / Math.max(d.speed, 0.1)) * (1000/60); // time to reach customer in ms
-        if (traveltime > remaining_ms) return; // can't reach in time
-        //logging is ai assisted for debugging pruposes
-       
-        //distance score = like 100 - distacee, so closer drivers get higher score
-        //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
-        let distanceScore = 100 - distance;
-        let amenityScore = 0;
-  
-        const requiredAmenities = customer.amenitiesRequired; // note:ai recommeded putting || [];
-        for (let i = 0; i < requiredAmenities.length; i++) {
-          for (let j = 0; j < d.amenities.length; j++) {
-            if(d.amenities[j] === requiredAmenities[i]){
-              amenityScore += 30;
-            }
+    //10 closest drivers
+
+    const closestDrivers = this.findClosestDrivers(customer.location, 10);
+    for (let d of closestDrivers) {
+      if (d.capacity < customer.passengers) continue; // capacity check
+      //time check
+      let distance = this.map.getDistance(d.location, customer.location);
+      const now = this.timeManager.getSimulationTime();
+      let remaining_ms = customer.expireTime - now;
+      const traveltime = (distance / Math.max(d.speed, 0.1)) * (1000/60); // time to reach customer in ms
+      if (traveltime > remaining_ms) continue; // can't reach in time
+      //logging is ai assisted for debugging pruposes
+     
+      //distance score = like 100 - distacee, so closer drivers get higher score
+      //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
+      let distanceScore = 100 - distance;
+      let amenityScore = 0;
+
+      const requiredAmenities = customer.amenitiesRequired; // note:ai recommeded putting || [];
+      for (let i = 0; i < requiredAmenities.length; i++) {
+        for (let j = 0; j < d.amenities.length; j++) {
+          if(d.amenities[j] === requiredAmenities[i]){
+            amenityScore += 30;
           }
         }
-        let currentscore = distanceScore + amenityScore;// add scores
-        if (currentscore > bestScore) {
-          bestScore = currentscore;
-          bestDriver = d;
-     
-        }
-        
-        // go to next driver in the list and repeat, if driver next is false, return highest rated driver
-        // during rush hours, perhaps limit the amount of drivers assesed per passenger to speed up matching
       }
-    );
+      let currentscore = distanceScore + amenityScore;// add scores
+      if (currentscore > bestScore) {
+        bestScore = currentscore;
+        bestDriver = d;
+   
+      }
+      
+      // go to next driver in the list and repeat, if driver next is false, return highest rated driver
+      // during rush hours, perhaps limit the amount of drivers assesed per passenger to speed up matching
+    }
     if (bestDriver) {
       // console.log(bestDriver.id, "score:", bestScore, "distanceScore:", bestDistanceScore, "amenityScore:", bestAmenityScore);
     }
@@ -447,13 +467,13 @@ customersort()
 
   handleExpirations() {
     // Move expired from pendingRequests to expiredRequests
-    this.pendingRequests.traverse((customer) => {
-      if (customer.status === "EXPIRED") {
-        this.expiredRequests.insert(customer);
-        this.pendingRequests.delete((c) => c.id === customer.id);
-        this.addEvent("EXPIRE", `Request ${customer.id} expired without match`);
-      }
-    });
+    // this.pendingRequests.traverse((customer) => {
+    //   if (customer.status === "EXPIRED") {
+    //     this.expiredRequests.insert(customer);
+    //     this.pendingRequests.delete((c) => c.id === customer.id);
+    //     this.addEvent("EXPIRE", `Request ${customer.id} expired without match`);
+    //   }
+    // });
     // Move expired from activeMatches to expiredRequests
     this.activeMatches.traverse((customer) => {
       if (customer.status === "EXPIRED") {
