@@ -57,10 +57,10 @@ class SimulationController {
     }
 
     this.csorttimer(this.requestcount);
-
+if (this.frameCounter % 5 === 0) {  // Update every 5 frames (helps perforance?)
     this.updateDrivers();
     this.updateCustomers();
-
+}
    this.processMatching();      // STUDENTS IMPLEMENT
    this.handleExpirations();    // STUDENTS IMPLEMENT
     
@@ -115,13 +115,13 @@ class SimulationController {
 
       if (driver.avgrating < 2 && driver.totalrides >= 10) {//this should be compan rating
         this.fireDriver(driver, "Fired due to low rating");
-        console.log(driver.id, "fired due to low rating:", driver.avgrating, "after", driver.totalrides, "rides");
+       // console.log(driver.id, "fired due to low rating:", driver.avgrating, "after", driver.totalrides, "rides");
       } else if (driver.avgrating < this.VroomVroomCorp.avgrating && driver.totalrides >= 20) {
         this.fireDriver(driver, "Fired due to below average rating");
-        console.log(driver.id, "fired due to below average rating:", driver.avgrating, "compared to company average of", this.VroomVroomCorp.avgrating, "after", driver.totalrides, "rides");
+        //console.log(driver.id, "fired due to below average rating:", driver.avgrating, "compared to company average of", this.VroomVroomCorp.avgrating, "after", driver.totalrides, "rides");
       } else if (driver.status === "INACTIVE") {
         this.fireDriver(driver, "Fired due to inactivity");
-        console.log(driver.id, "fired due to inactivity");
+       // console.log(driver.id, "fired due to inactivity");
       }
     });
   }
@@ -203,17 +203,23 @@ class SimulationController {
   }
 
   updateCustomers() {
-    this.pendingRequests.traverse((customer) => customer.update());
-    this.activeMatches.traverse((customer) => customer.update());
-    this.handleRideCompletions();
-    this.handleExpirations();
-        this.pendingRequests.traverse((customer) => {
-      if (customer.status === "EXPIRED") {
-        this.expiredRequests.insert(customer);
-        this.pendingRequests.delete((c) => c.id === customer.id);
-        this.addEvent("EXPIRE", `Request ${customer.id} expired without match`);
-      }
-    });
+    this.pendingRequests.traverse((customer) => {
+  customer.update();
+  if (customer.status === "EXPIRED") {
+    this.expiredRequests.insert(customer);
+    this.pendingRequests.delete((c) => c.id === customer.id);
+    this.addEvent("EXPIRE", `Request ${customer.id} expired without match`);
+  }
+});
+this.activeMatches.traverse((customer) => {
+  customer.update();
+  if (customer.status === "EXPIRED") {
+    this.expiredRequests.insert(customer);
+    this.activeMatches.delete((c) => c.id === customer.id);
+  }
+});
+this.handleRideCompletions();
+
   }
 
 //driversort()
@@ -225,15 +231,15 @@ class SimulationController {
 //}
 
 csorttimer(requestCount) {
-  // every 50 requests, sort customers based on priority once per 50-request milestone
-  if (requestCount > 0 && requestCount % 50 === 0 && requestCount > this.lastCustomerSortCount) {
+  // every 500 requests, sort customers based on priority once per 50-request milestone
+  if (requestCount > 0 && requestCount % 500 === 0 && requestCount > this.lastCustomerSortCount) {
     this.customersort();
     this.lastCustomerSortCount = requestCount;
-    console.log("customerssorted");
+   // console.log("customerssorted");
     //debugging
-      console.log("Customer list order:");
+      //console.log("Customer list order:");
   this.pendingRequests.traverse((customer) => {
-    console.log(` - ${customer.id}: ${customer.subscriptionPlan}, ${customer.expireTime}, ${customer.passengers}, ${customer.amenitiesRequired ? customer.amenitiesRequired.length : 0}`);
+   // console.log(` - ${customer.id}: ${customer.subscriptionPlan}, ${customer.expireTime}, ${customer.passengers}, ${customer.amenitiesRequired ? customer.amenitiesRequired.length : 0}`);
   });
   }
   //every 50 passenger requests, sort customers based on priority
@@ -639,5 +645,16 @@ customersort()
 
     this.eventLog.insert(event);
     this.eventLogSize++;
+    if (this.eventLogSize > this.maxEventLogSize) {
+  // Traverse and delete old events
+  //export log to console for debugging before deleting
+  console.log("Event log exceeded max size. Exporting log:");
+  this.eventLog.traverse((e) => {
+    //console.log("exported event");
+    console.log(`[${e.timestamp}] ${e.source}: ${e.message}`);
+  });
+  this.eventLog.delete(() => true); // delete all events
+  this.eventLogSize = 0;
+}
   }
 }
