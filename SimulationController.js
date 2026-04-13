@@ -196,7 +196,7 @@ class SimulationController {
 
     // if there are many drivers, spawn passengers faster at ~1 driver : 1.5 customers
     const driverCount = this.availableDrivers ? this.availableDrivers.size : 0;
-    const driverSpawnFactor = 1 + 2^driverCount;
+    const driverSpawnFactor = 1 + (driverCount ** 2)/100;
 
     // combine base interval with rating and driver supply
     const interval = baseInterval / (1 * driverSpawnFactor); //change 1 to ratingFactor
