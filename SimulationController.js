@@ -165,7 +165,7 @@ class SimulationController {
 
   spawnRandomCustomer() {
     // Cap pending requests to prevent runaway list growth, this could be adj based on driver amt
-    if (this.pendingRequests.size >= this.driverCounter*3) {
+    if (this.pendingRequests.size >= this.driverCounter*2) {
       return; // Stop spawning if queue is too large
     }
     this.requestcount++;
@@ -204,7 +204,13 @@ class SimulationController {
 
     // combine base interval with rating and driver supply
     const interval = baseInterval / (1 * driverSpawnFactor); //change 1 to ratingFactor
-    return Math.max(1, Math.round(interval));
+    
+    // Reduce spawn rate to 30% during night hours (10 PM to 6 AM)
+    const isNight = hour >= 22 || hour < 6;
+    const nightMultiplier = isNight ? 1 / 0.3 : 1;
+    const adjustedInterval = interval * nightMultiplier;
+    
+    return Math.max(1, Math.round(adjustedInterval));
   }
 
   updateDrivers() {
@@ -331,7 +337,19 @@ customersort()
   items.forEach((customer) => this.pendingRequests.insert(customer));
 }
 //ai assisted sorting algoritm for distance
-  findClosestDrivers(customerLocation, minCapacity, limit = 10) {
+  findClosestDrivers(customerLocation, minCapacity, baseLimit, requestFactor) {
+    // Calculate active requests (pending + active matches)
+    const activeRequests = this.pendingRequests.size + this.activeMatches.size;
+    
+    // Adjust limit: more requests = fewer drivers evaluated, but not below 3
+    const adjustedLimit = Math.max(3, Math.floor(baseLimit - (activeRequests * requestFactor)));
+    
+//    Base limit: 20 drivers when there are few requests
+// Scaling: Reduces by 0.05 per active request
+// Examples:
+// 0 active requests → evaluates 20 drivers
+// 200 active requests → evaluates 10 drivers
+// 340+ active requests → evaluates 3 drivers (minimum)
     const candidates = [];
     this.availableDrivers.traverse((driver) => {
       if (driver.status !== "AVAILABLE") return;
@@ -341,8 +359,8 @@ customersort()
     });
     // Sort by distance ascending
     candidates.sort((a, b) => a.distance - b.distance);
-    // Return top limit drivers
-    return candidates.slice(0, limit).map(c => c.driver);
+    // Return top adjustedLimit drivers
+    return candidates.slice(0, adjustedLimit).map(c => c.driver);
   }
 
   processMatching() {
@@ -360,7 +378,7 @@ customersort()
     // => means its a function
     //10 closest drivers
 
-    const closestDrivers = this.findClosestDrivers(customer.location,customer.passengers, 10);
+    const closestDrivers = this.findClosestDrivers(customer.location, customer.passengers, 20, 0.05);//20 base, -0.05 per req.
     for (let d of closestDrivers) {//only 10 of the closest drivers with the capacity to reach
 
       //time check
