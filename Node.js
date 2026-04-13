@@ -112,6 +112,10 @@ class Company{
     this.activeDrivers = count;
   }
 
+  setExpiredRequests(count) {
+    this.expiredRequests = count;
+  }
+
   getCompanyData() {
     return { //ai assised
       revenue: Math.round(this.revenue),
@@ -119,6 +123,7 @@ class Company{
       profit: Math.round(this.profit),
       totalRides: this.totalRides,
       activeDrivers: this.activeDrivers,
+      expiredRequests: this.expiredRequests || 0,
       // keep the old values but UI will drop them
       satisfaction: Math.round(this.satisfaction),
       avgRideTime: Math.round(this.avgRideTime),

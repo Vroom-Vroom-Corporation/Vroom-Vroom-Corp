@@ -445,6 +445,14 @@ class UIManager {// this page is ai assisted
             <span class="report-value">${companyData.totalRides}</span>
           </div>
           <div class="report-item">
+            <span class="report-label">Expired Requests:</span>
+            <span class="report-value">${companyData.expiredRequests}</span>
+          </div>
+          <div class="report-item">
+            <span class="report-label">Success Rate:</span>
+            <span class="report-value">${companyData.totalRides + companyData.expiredRequests === 0 ? 'N/A' : ((companyData.totalRides / (companyData.totalRides + companyData.expiredRequests)) * 100).toFixed(1) + '%'}</span>
+          </div>
+          <div class="report-item">
             <span class="report-label">Active Drivers:</span>
             <span class="report-value">${companyData.activeDrivers}</span>
           </div>

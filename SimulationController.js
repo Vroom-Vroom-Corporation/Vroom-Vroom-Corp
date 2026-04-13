@@ -31,7 +31,7 @@ class SimulationController {
     this.lastMatchTime = 0;
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 10; i++) {
           this.spawnRandomDriver();
     }
     //test case for spawning customers at start
@@ -164,6 +164,10 @@ class SimulationController {
   }
 
   spawnRandomCustomer() {
+    // Cap pending requests to prevent runaway list growth, this could be adj based on driver amt
+    if (this.pendingRequests.size >= this.driverCounter*3) {
+      return; // Stop spawning if queue is too large
+    }
     this.requestcount++;
     const loc = this.map.getRandomLocation();
     const dest = this.map.getRandomLocation();
@@ -239,7 +243,9 @@ this.handleRideCompletions();
 
 csorttimer(requestCount) {
   // every 500 requests, sort customers based on priority once per 50-request milestone
-  if (requestCount > 0 && requestCount % 500 === 0 && requestCount > this.lastCustomerSortCount) {
+  if (requestCount > 0 && requestCount % 1000 === 0 && 
+        requestCount > this.lastCustomerSortCount && 
+        this.pendingRequests.size <= 2000)  {
     this.customersort();
     this.lastCustomerSortCount = requestCount;
    // console.log("customerssorted");
@@ -266,9 +272,10 @@ customersort()
     items.push(customer);
   });
 
-  if (items.length <= 1) {
-    return;
-  }
+     // Skip sorting for very small or very large lists
+    if (items.length <= 1 || items.length > 2500) {
+      return;
+    }
 
   const swap = (arr, i, j) => {
     const temp = arr[i];
@@ -324,10 +331,11 @@ customersort()
   items.forEach((customer) => this.pendingRequests.insert(customer));
 }
 //ai assisted sorting algoritm for distance
-  findClosestDrivers(customerLocation, limit = 10) {
+  findClosestDrivers(customerLocation, minCapacity, limit = 10) {
     const candidates = [];
     this.availableDrivers.traverse((driver) => {
       if (driver.status !== "AVAILABLE") return;
+         if (driver.capacity < minCapacity) return;
       const distance = this.map.getDistance(driver.location, customerLocation);
       candidates.push({ driver, distance });
     });
@@ -352,9 +360,9 @@ customersort()
     // => means its a function
     //10 closest drivers
 
-    const closestDrivers = this.findClosestDrivers(customer.location, 10);
-    for (let d of closestDrivers) {
-      if (d.capacity < customer.passengers) continue; // capacity check
+    const closestDrivers = this.findClosestDrivers(customer.location,customer.passengers, 10);
+    for (let d of closestDrivers) {//only 10 of the closest drivers with the capacity to reach
+
       //time check
       let distance = this.map.getDistance(d.location, customer.location);
       const now = this.timeManager.getSimulationTime();
@@ -480,6 +488,8 @@ customersort()
   }
 
   handleExpirations() {
+        // Batch expiration handling - only check every 5 frames
+    if (this.frameCounter % 5 !== 0) return;
     // Move expired from pendingRequests to expiredRequests
     // this.pendingRequests.traverse((customer) => {
     //   if (customer.status === "EXPIRED") {
@@ -639,6 +649,7 @@ customersort()
       
       // Update company info
       this.VroomVroomCorp.setActiveDrivers(allDrivers.length);
+      this.VroomVroomCorp.setExpiredRequests(expiredCustomers.length);
       this.uiManager.updateCompanyInfo(this.VroomVroomCorp.getCompanyData());
     }
   }
