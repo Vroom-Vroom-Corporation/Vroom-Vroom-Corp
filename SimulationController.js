@@ -44,7 +44,7 @@ class SimulationController {
 
   update() {
     this.frameCounter++;
-      this.spawnRandomCustomer();
+      //this.spawnRandomCustomer();
     //note: keep drivers constant for now
     //this.MassLayoffs();
     // Calculate dynamic spawn interval based on current time
@@ -57,10 +57,10 @@ class SimulationController {
     }
 
     this.csorttimer(this.requestcount);
-if (this.frameCounter % 5 === 0) {  // Update every 5 frames (helps perforance?)
+//if (this.frameCounter % 5 === 0) {  // Update every 5 frames (helps perforance?)
     this.updateDrivers();
     this.updateCustomers();
-}
+//}
    this.processMatching();      // STUDENTS IMPLEMENT
    this.handleExpirations();    // STUDENTS IMPLEMENT
     
@@ -185,15 +185,22 @@ if (this.frameCounter % 5 === 0) {  // Update every 5 frames (helps perforance?)
     const isEveningPeak = hour >= 16 && hour < 19;
     //source https://www.daisylimo.com/blog/when-is-rush-hour-in-new-york-and-new-jersey/
     // base interval depends on peak vs off-peak (ai assisted)
-    const baseInterval = (isWeekday && (isMorningPeak || isEveningPeak)) ? 60 : 180;
+    const baseInterval = (isWeekday && (isMorningPeak || isEveningPeak)) ? 30 : 90;
+    
+
+
 
     // adjust interval based on company average rating
     // higher rating -> more frequent spawns, lower rating -> slower spawns
-    const rating = this.VroomVroomCorp.avgrating || 1; // avoid division by zero
-    const ratingFactor = rating; 
-    // combine base interval with rating factor; ensure it never goes below a minimum
-    const interval =(( baseInterval / (1 + ratingFactor)));
-    return Math.max(20, Math.round(interval));
+    // const ratingFactor = 1 + (this.VroomVroomCorp.avgrating || 1); // keep rating effect
+
+    // if there are many drivers, spawn passengers faster at ~1 driver : 1.5 customers
+    const driverCount = this.availableDrivers ? this.availableDrivers.size : 0;
+    const driverSpawnFactor = 1 + 2^driverCount;
+
+    // combine base interval with rating and driver supply
+    const interval = baseInterval / (1 * driverSpawnFactor); //change 1 to ratingFactor
+    return Math.max(1, Math.round(interval));
   }
 
   updateDrivers() {
@@ -360,6 +367,7 @@ customersort()
       //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
       let distanceScore = 100 - distance;
       let amenityScore = 0;
+      let ratingScore = d.avgrating * 20; // convert rating to a score out of 100
 
       const requiredAmenities = customer.amenitiesRequired; // note:ai recommeded putting || [];
       for (let i = 0; i < requiredAmenities.length; i++) {
@@ -369,7 +377,7 @@ customersort()
           }
         }
       }
-      let currentscore = distanceScore + amenityScore;// add scores
+      let currentscore = distanceScore + amenityScore + ratingScore;// add scores
       if (currentscore > bestScore) {
         bestScore = currentscore;
         bestDriver = d;
@@ -649,10 +657,11 @@ customersort()
   // Traverse and delete old events
   //export log to console for debugging before deleting
   console.log("Event log exceeded max size. Exporting log:");
-  this.eventLog.traverse((e) => {
-    //console.log("exported event");
-    console.log(`[${e.timestamp}] ${e.source}: ${e.message}`);
-  });
+  //turn off for perforance
+  // this.eventLog.traverse((e) => {
+  //   //console.log("exported event");
+  //   console.log(`[${e.timestamp}] ${e.source}: ${e.message}`);
+  // });
   this.eventLog.delete(() => true); // delete all events
   this.eventLogSize = 0;
 }
