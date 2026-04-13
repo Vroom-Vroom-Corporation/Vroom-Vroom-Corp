@@ -31,7 +31,7 @@ class SimulationController {
     this.lastMatchTime = 0;
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 1000; i++) {
           this.spawnRandomDriver();
     }
     //test case for spawning customers at start
@@ -441,6 +441,7 @@ customersort()
           const rawDistance = this.map.getDistance(customer.location, customer.destination);
           const distance = isNaN(rawDistance) ? 0 : rawDistance; // ai debugging
         let score =0;
+        //scoreing class : 0:1:3:5 +- up to 20/5 -> 4  
           let tips=0;
 
           //fare for basic and poor customers
@@ -464,6 +465,10 @@ customersort()
             score +=5;
           }
           score += customer.driversatsfaction/5; // increase score based on driver satisfaction, max 5 points
+          
+          // Clamp score to 0-5 range
+          score = Math.max(0, Math.min(5, score));
+          
             tips = isNaN(customer.driversatsfaction) ? 0 : customer.driversatsfaction; // tips based on driver satisfaction, max 10% of fare
         const fare = baseFare + (distance/1000 * distanceRate) + ((isNaN(customer.passengers) ? 1 : customer.passengers) * passengerRate) + tips; // ai assisted debugging
         // increased earnings amenities
