@@ -48,7 +48,11 @@ class SimulationController {
 
   update() {
     this.frameCounter++;
-      //this.spawnRandomCustomer();
+      this.spawnRandomCustomer();
+         this.spawnRandomCustomer();
+            this.spawnRandomCustomer();
+               this.spawnRandomCustomer();
+           
     //note: keep drivers constant for now
     //this.MassLayoffs();
     // Calculate dynamic spawn interval based on current time
