@@ -31,7 +31,7 @@ class SimulationController {
     this.lastMatchTime = 0;
     this.longestMatchTime = 0;
     this.matchTimes = [];
-    this.matchTimeWindow = 1000;
+    this.matchTimeWindow = 100;
     this.matchTimeIndex = 0;
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
@@ -48,10 +48,7 @@ class SimulationController {
 
   update() {
     this.frameCounter++;
-      this.spawnRandomCustomer();
-         this.spawnRandomCustomer();
-            this.spawnRandomCustomer();
-               this.spawnRandomCustomer();
+
            
     //note: keep drivers constant for now
     //this.MassLayoffs();
@@ -61,7 +58,9 @@ class SimulationController {
     const spawnInterval = Math.max(1, Math.round(baseSpawnInterval / timeScale));
 
     if (this.frameCounter % spawnInterval === 0) {
+      for (let i = 0; i < Math.round(this.driverCounter/200); i++) { // spawn multiple customers if timeScale is high to keep up with accelerated time
       this.spawnRandomCustomer();
+      }
     }
 
     this.csorttimer(this.requestcount);
@@ -404,14 +403,20 @@ customersort()
       let amenityScore = 0;
       let ratingScore = d.avgrating * 20; // convert rating to a score out of 100
 
-      const requiredAmenities = customer.amenitiesRequired; // note:ai recommeded putting || [];
-      for (let i = 0; i < requiredAmenities.length; i++) {
-        for (let j = 0; j < d.amenities.length; j++) {
-          if(d.amenities[j] === requiredAmenities[i]){
-            amenityScore += 30;
-          }
-        }
-      }
+      // const requiredAmenities = customer.amenitiesRequired; // note:ai recommeded putting || [];
+      // for (let i = 0; i < requiredAmenities.length; i++) {
+      //   for (let j = 0; j < d.amenities.length; j++) {
+      //     if(d.amenities[j] === requiredAmenities[i]){
+      //       amenityScore += 30;
+      //     }
+      //   }
+      // }
+      const requiredAmenities = customer.amenitiesRequired || [];
+for (let req of requiredAmenities) {
+  if (d.amenitySet && d.amenitySet.has(req)) {
+    amenityScore += 30;
+  }
+}
       let currentscore = distanceScore + amenityScore + ratingScore;// add scores
       if (currentscore > bestScore) {
         bestScore = currentscore;
@@ -641,10 +646,14 @@ customersort()
     textSize(14);
     textAlign(LEFT);
     text(`Last match time: ${this.lastMatchTime.toFixed(2)}ms`, x + 10, y + 20);
-    text(`Longest match time: ${this.longestMatchTime.toFixed(2)}ms`, x + 10, y + 40);
+    
+    // Calculate average of last 100 match times
+    const avgMatchTime = this.matchTimes.length > 0 ? this.matchTimes.reduce((a, b) => a + b, 0) / this.matchTimes.length : 0;
+    text(`Avg match time (last 100): ${avgMatchTime.toFixed(2)}ms`, x + 10, y + 40);
+    
     text(`Debug: ${this.pendingRequests.size} pending, ${this.availableDrivers.size} drivers`, x + 10, y + 60);
     
-    // Draw pie chart for drivers and customers
+    // Draw pie chart for drivers and customers ai assisted
     let driverIdleCount = 0;
     let driverEnRouteCount = 0;
     let driverToDestinationCount = 0;
@@ -667,9 +676,16 @@ customersort()
     });
 
     const pendingCount = this.pendingRequests.size;
-    const activeCount = this.activeMatches.size;
-    const expiredCount = this.expiredRequests.size;
-    const total = driverIdleCount + driverEnRouteCount + driverToDestinationCount + driverInactiveCount + driverOtherCount + pendingCount + activeCount + expiredCount;
+    let matchedCount = 0;
+    let inTransitCount = 0;
+    this.activeMatches.traverse((customer) => {
+      if (customer.status === "MATCHED") {
+        matchedCount++;
+      } else if (customer.status === "TRAVELLING") {
+        inTransitCount++;
+      }
+    });
+    const total = driverIdleCount + driverEnRouteCount + driverToDestinationCount + driverInactiveCount + driverOtherCount + pendingCount + matchedCount + inTransitCount;
     if (total > 0) {
       const pieX = 400;
       const pieY = height - 300;
@@ -688,83 +704,85 @@ customersort()
       const driverInactiveAngle = (driverInactiveCount / total) * TWO_PI;
       const driverOtherAngle = (driverOtherCount / total) * TWO_PI;
       const pendingAngle = (pendingCount / total) * TWO_PI;
-      const activeAngle = (activeCount / total) * TWO_PI;
-      const expiredAngle = (expiredCount / total) * TWO_PI;
+      const matchedAngle = (matchedCount / total) * TWO_PI;
+      const inTransitAngle = (inTransitCount / total) * TWO_PI;
       
       noStroke();
       
-      // Driver idle slice (white)
-      fill(255);
+      // Driver idle slice (yellow - warm)
+      fill(255, 255, 0);
       arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverIdleAngle);
       startAngle += driverIdleAngle;
       
-      // Driver en route slice (orange)
+      // Driver en route slice (orange - warm)
       fill(255, 165, 0);
       arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverEnRouteAngle);
       startAngle += driverEnRouteAngle;
       
-      // Driver to destination slice (blue)
-      fill(0, 0, 255);
+      // Driver to destination slice (red - warm)
+      fill(255, 0, 0);
       arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverToDestinationAngle);
       startAngle += driverToDestinationAngle;
       
-      // Driver inactive slice (dark gray)
-      fill(80);
+      // Driver inactive slice (brown - warm)
+      fill(139, 69, 19);
       arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverInactiveAngle);
       startAngle += driverInactiveAngle;
       
-      // Driver other slice (cyan)
+      // Driver other slice (pink - warm)
       if (driverOtherCount > 0) {
-        fill(0, 255, 255);
+        fill(255, 192, 203);
         arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverOtherAngle);
         startAngle += driverOtherAngle;
       }
       
-      // Pending customer slice (yellow)
-      fill(255, 255, 0);
+      // Pending customer slice (blue - cool)
+      fill(0, 0, 255);
       arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + pendingAngle);
       startAngle += pendingAngle;
       
-      // Active customer slice (red)
-      fill(255, 0, 0);
-      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + activeAngle);
-      startAngle += activeAngle;
+      // Matched customer slice (green - cool)
+      fill(0, 255, 0);
+      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + matchedAngle);
+      startAngle += matchedAngle;
       
-      // Expired customer slice (gray)
-      fill(128, 128, 128);
-      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + expiredAngle);
+      // In transit customer slice (purple - cool)
+      fill(128, 0, 128);
+      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + inTransitAngle);
       
-      // Add labels, matching slice colors
+      // Add labels, split by drivers (left) and passengers (right)
       textAlign(CENTER);
       textSize(12);
       stroke(0);
       strokeWeight(2);
 
-      fill(255); // idle label on dark background
-      text(`Idle: ${driverIdleCount}`, pieX, pieY - pieRadius - 10);
+      // Drivers (left side)
+      fill(255, 255, 0); // idle - yellow
+      text(`Idle: ${driverIdleCount}`, pieX - pieRadius - 60, pieY - 40);
 
-      fill(255, 165, 0);
-      text(`En route: ${driverEnRouteCount}`, pieX - pieRadius - 50, pieY - 10);
+      fill(255, 165, 0); // en route - orange
+      text(`En route: ${driverEnRouteCount}`, pieX - pieRadius - 60, pieY - 20);
 
-      fill(0, 0, 255);
-      text(`To dest: ${driverToDestinationCount}`, pieX + pieRadius + 50, pieY - 10);
+      fill(255, 0, 0); // to dest - red
+      text(`To dest: ${driverToDestinationCount}`, pieX - pieRadius - 60, pieY);
 
-      fill(80);
-      text(`Inactive: ${driverInactiveCount}`, pieX - pieRadius - 50, pieY + 10);
+      fill(139, 69, 19); // inactive - brown
+      text(`Inactive: ${driverInactiveCount}`, pieX - pieRadius - 60, pieY + 20);
 
       if (driverOtherCount > 0) {
-        fill(0, 255, 255);
-        text(`Other: ${driverOtherCount}`, pieX + pieRadius + 50, pieY + 10);
+        fill(255, 192, 203); // other - pink
+        text(`Other: ${driverOtherCount}`, pieX - pieRadius - 60, pieY + 40);
       }
 
-      fill(255, 255, 0);
-      text(`Pending: ${pendingCount}`, pieX - pieRadius - 50, pieY + 30);
+      // Passengers (right side)
+      fill(0, 0, 255); // pending - blue
+      text(`Pending: ${pendingCount}`, pieX + pieRadius + 60, pieY - 20);
 
-      fill(255, 0, 0);
-      text(`Active: ${activeCount}`, pieX + pieRadius + 50, pieY + 30);
+      fill(0, 255, 0); // matched - green
+      text(`Matched: ${matchedCount}`, pieX + pieRadius + 60, pieY);
 
-      fill(128, 128, 128);
-      text(`Expired: ${expiredCount}`, pieX, pieY + pieRadius + 20);
+      fill(128, 0, 128); // in transit - purple
+      text(`In transit: ${inTransitCount}`, pieX + pieRadius + 60, pieY + 20);
     }
     
     // Restore drawing state
