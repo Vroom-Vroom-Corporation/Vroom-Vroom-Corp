@@ -55,7 +55,7 @@ class SimulationController {
     // Calculate dynamic spawn interval based on current time
     const baseSpawnInterval = this.calculateSpawnInterval();
     const timeScale = this.timeManager.getTimeScale();
-    const spawnInterval = Math.max(1, Math.round(baseSpawnInterval / timeScale));
+    const spawnInterval = Math.max(1, Math.round(baseSpawnInterval));
 
     if (this.frameCounter % spawnInterval === 0) {
       for (let i = 0; i < Math.round(this.driverCounter/200); i++) { // spawn multiple customers if timeScale is high to keep up with accelerated time
@@ -635,8 +635,8 @@ for (let req of requiredAmenities) {
     // Save current drawing state
     push();
     
-    // Position in top right corner
-    const x = width - 310; // 300px width + 10px margin from right edge
+    // Position to match copyright location
+    const x = 570;
     const y = 25;
     
     // Draw debug text with black outline for visibility
@@ -645,6 +645,7 @@ for (let req of requiredAmenities) {
     strokeWeight(3);
     textSize(14);
     textAlign(LEFT);
+    text("Vroom Vroom Corporation © 2026", x, y);
     text(`Last match time: ${this.lastMatchTime.toFixed(2)}ms`, x + 10, y + 20);
     
     // Calculate average of last 100 match times
