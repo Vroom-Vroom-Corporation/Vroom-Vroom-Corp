@@ -29,6 +29,10 @@ class SimulationController {
     //ai assisted
     this.debugMode = false;
     this.lastMatchTime = 0;
+    this.longestMatchTime = 0;
+    this.matchTimes = [];
+    this.matchTimeWindow = 1000;
+    this.matchTimeIndex = 0;
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
     for (let i = 0; i < 1000; i++) {
@@ -337,7 +341,7 @@ customersort()
   items.forEach((customer) => this.pendingRequests.insert(customer));
 }
 //ai assisted sorting algoritm for distance
-  findClosestDrivers(customerLocation, minCapacity, baseLimit, requestFactor) {
+  findClosestDrivers(customer, customerLocation, minCapacity, baseLimit, requestFactor) {
     // Calculate active requests (pending + active matches)
     const activeRequests = this.pendingRequests.size + this.activeMatches.size;
     
@@ -345,7 +349,7 @@ customersort()
     const adjustedLimit = Math.max(3, Math.floor(baseLimit - (activeRequests * requestFactor)));
     
 //    Base limit: 20 drivers when there are few requests
-// Scaling: Reduces by 0.05 per active request
+// Scaling: Reduces by 0.05*drivercount/10 per active request
 // Examples:
 // 0 active requests → evaluates 20 drivers
 // 200 active requests → evaluates 10 drivers
@@ -355,6 +359,10 @@ customersort()
       if (driver.status !== "AVAILABLE") return;
          if (driver.capacity < minCapacity) return;
       const distance = this.map.getDistance(driver.location, customerLocation);
+            const now = this.timeManager.getSimulationTime();
+      let remaining_ms = customer.expireTime - now;
+      const traveltime = (distance / Math.max(driver.speed, 0.1)) * (1000/60); // time to reach customer in ms
+      if (traveltime > remaining_ms) return; // can't reach in time
       candidates.push({ driver, distance });
     });
     // Sort by distance ascending
@@ -378,15 +386,12 @@ customersort()
     // => means its a function
     //10 closest drivers
 
-    const closestDrivers = this.findClosestDrivers(customer.location, customer.passengers, 20, 0.05);//20 base, -0.05 per req.
+    const closestDrivers = this.findClosestDrivers(customer, customer.location, customer.passengers, 20, 0.05*(this.driverCounter/10));//20 base, -0.05 per req.
     for (let d of closestDrivers) {//only 10 of the closest drivers with the capacity to reach
 
       //time check
       let distance = this.map.getDistance(d.location, customer.location);
-      const now = this.timeManager.getSimulationTime();
-      let remaining_ms = customer.expireTime - now;
-      const traveltime = (distance / Math.max(d.speed, 0.1)) * (1000/60); // time to reach customer in ms
-      if (traveltime > remaining_ms) continue; // can't reach in time
+
       //logging is ai assisted for debugging pruposes
      
       //distance score = like 100 - distacee, so closer drivers get higher score
@@ -429,6 +434,24 @@ customersort()
     //ai assisded data alansiis
     const endTime = performance.now();
     this.lastMatchTime = endTime - startTime;
+
+    const oldValue = this.matchTimes.length === this.matchTimeWindow
+      ? this.matchTimes[this.matchTimeIndex]
+      : null;
+
+    if (this.matchTimes.length < this.matchTimeWindow) {
+      this.matchTimes.push(this.lastMatchTime);
+    } else {
+      this.matchTimes[this.matchTimeIndex] = this.lastMatchTime;
+    }
+
+    this.matchTimeIndex = (this.matchTimeIndex + 1) % this.matchTimeWindow;
+
+    if (this.lastMatchTime >= this.longestMatchTime) {
+      this.longestMatchTime = this.lastMatchTime;
+    } else if (oldValue === this.longestMatchTime) {
+      this.longestMatchTime = Math.max(...this.matchTimes);
+    }
   }
 
 //monee
@@ -614,7 +637,131 @@ customersort()
     textSize(14);
     textAlign(LEFT);
     text(`Last match time: ${this.lastMatchTime.toFixed(2)}ms`, x + 10, y + 20);
-    text(`Debug: ${this.pendingRequests.size} pending, ${this.availableDrivers.size} drivers`, x + 10, y + 40);
+    text(`Longest match time: ${this.longestMatchTime.toFixed(2)}ms`, x + 10, y + 40);
+    text(`Debug: ${this.pendingRequests.size} pending, ${this.availableDrivers.size} drivers`, x + 10, y + 60);
+    
+    // Draw pie chart for drivers and customers
+    let driverIdleCount = 0;
+    let driverEnRouteCount = 0;
+    let driverToDestinationCount = 0;
+    let driverInactiveCount = 0;
+    let driverOtherCount = 0;
+
+    this.availableDrivers.traverse((driver) => {
+      if (!driver) return;
+      if (driver.status === "INACTIVE") {
+        driverInactiveCount += 1;
+      } else if (driver.state === "IDLE") {
+        driverIdleCount += 1;
+      } else if (driver.state === "EN_ROUTE") {
+        driverEnRouteCount += 1;
+      } else if (driver.state === "TO_DESTINATION") {
+        driverToDestinationCount += 1;
+      } else {
+        driverOtherCount += 1;
+      }
+    });
+
+    const pendingCount = this.pendingRequests.size;
+    const activeCount = this.activeMatches.size;
+    const expiredCount = this.expiredRequests.size;
+    const total = driverIdleCount + driverEnRouteCount + driverToDestinationCount + driverInactiveCount + driverOtherCount + pendingCount + activeCount + expiredCount;
+    if (total > 0) {
+      const pieX = 400;
+      const pieY = height - 300;
+      const pieRadius = 100;
+      
+      // Title
+      fill(255);
+      textAlign(CENTER);
+      textSize(14);
+      text("Simulation Breakdown", pieX, pieY - pieRadius - 30);
+      
+      let startAngle = 0;
+      const driverIdleAngle = (driverIdleCount / total) * TWO_PI;
+      const driverEnRouteAngle = (driverEnRouteCount / total) * TWO_PI;
+      const driverToDestinationAngle = (driverToDestinationCount / total) * TWO_PI;
+      const driverInactiveAngle = (driverInactiveCount / total) * TWO_PI;
+      const driverOtherAngle = (driverOtherCount / total) * TWO_PI;
+      const pendingAngle = (pendingCount / total) * TWO_PI;
+      const activeAngle = (activeCount / total) * TWO_PI;
+      const expiredAngle = (expiredCount / total) * TWO_PI;
+      
+      noStroke();
+      
+      // Driver idle slice (white)
+      fill(255);
+      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverIdleAngle);
+      startAngle += driverIdleAngle;
+      
+      // Driver en route slice (orange)
+      fill(255, 165, 0);
+      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverEnRouteAngle);
+      startAngle += driverEnRouteAngle;
+      
+      // Driver to destination slice (blue)
+      fill(0, 0, 255);
+      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverToDestinationAngle);
+      startAngle += driverToDestinationAngle;
+      
+      // Driver inactive slice (dark gray)
+      fill(80);
+      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverInactiveAngle);
+      startAngle += driverInactiveAngle;
+      
+      // Driver other slice (cyan)
+      if (driverOtherCount > 0) {
+        fill(0, 255, 255);
+        arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverOtherAngle);
+        startAngle += driverOtherAngle;
+      }
+      
+      // Pending customer slice (yellow)
+      fill(255, 255, 0);
+      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + pendingAngle);
+      startAngle += pendingAngle;
+      
+      // Active customer slice (red)
+      fill(255, 0, 0);
+      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + activeAngle);
+      startAngle += activeAngle;
+      
+      // Expired customer slice (gray)
+      fill(128, 128, 128);
+      arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + expiredAngle);
+      
+      // Add labels, matching slice colors
+      textAlign(CENTER);
+      textSize(12);
+      stroke(0);
+      strokeWeight(2);
+
+      fill(255); // idle label on dark background
+      text(`Idle: ${driverIdleCount}`, pieX, pieY - pieRadius - 10);
+
+      fill(255, 165, 0);
+      text(`En route: ${driverEnRouteCount}`, pieX - pieRadius - 50, pieY - 10);
+
+      fill(0, 0, 255);
+      text(`To dest: ${driverToDestinationCount}`, pieX + pieRadius + 50, pieY - 10);
+
+      fill(80);
+      text(`Inactive: ${driverInactiveCount}`, pieX - pieRadius - 50, pieY + 10);
+
+      if (driverOtherCount > 0) {
+        fill(0, 255, 255);
+        text(`Other: ${driverOtherCount}`, pieX + pieRadius + 50, pieY + 10);
+      }
+
+      fill(255, 255, 0);
+      text(`Pending: ${pendingCount}`, pieX - pieRadius - 50, pieY + 30);
+
+      fill(255, 0, 0);
+      text(`Active: ${activeCount}`, pieX + pieRadius + 50, pieY + 30);
+
+      fill(128, 128, 128);
+      text(`Expired: ${expiredCount}`, pieX, pieY + pieRadius + 20);
+    }
     
     // Restore drawing state
     pop();
