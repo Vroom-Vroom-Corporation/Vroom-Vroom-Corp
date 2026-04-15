@@ -17,6 +17,13 @@ class SimulationController {
     this.requestcount = 0;
     this.lastCustomerSortCount = 0;
     this.frameCounter = 0;
+//ai aissisted
+    // Grid for spatial bucketing of drivers (10x10 grid for 800x600 map)
+    this.gridSize = 10;
+    this.cellWidth = width / this.gridSize;
+    this.cellHeight = height / this.gridSize;
+    this.driverGrid = Array(this.gridSize).fill().map(() => Array(this.gridSize).fill().map(() => new LinkedList()));
+    this.lastGridUpdate = 0;
 
     this.driverCounter = 1;
     this.customerCounter = 1;
@@ -35,9 +42,11 @@ class SimulationController {
     this.matchTimeIndex = 0;
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 10000; i++) {
           this.spawnRandomDriver();
     }
+    // Initialize driver grid with spawned drivers
+    this.updateDriverGrid();
     //test case for spawning customers at start
     // for (let i = 0; i < 1000; i++) {
     //   this.spawnRandomCustomer();
@@ -67,13 +76,19 @@ class SimulationController {
     this.csorttimer(this.requestcount);
 //if (this.frameCounter % 5 === 0) {  // Update every 5 frames (helps perforance?)
     this.updateDrivers();
+    //ai aissisted
+    if (this.frameCounter % 10 === 0) {
+      this.updateDriverGrid();
+    }
     this.updateCustomers();
 //}
    this.processMatching();      // STUDENTS IMPLEMENT
-   this.handleExpirations();    // STUDENTS IMPLEMENT
+  // this.handleExpirations();    // STUDENTS IMPLEMENT
     
     // Update UI sidebar with active customers
+    if (this.frameCounter % 10 === 0) { // Update UI every 10 frames to reduce overhead
     this.updateUI();
+    }
 
     // Trigger monthly hiring at fixed simulation intervals.
     const currentSimTime = this.timeManager.getSimulationTime();
@@ -185,6 +200,24 @@ class SimulationController {
     this.addEvent(customer.id, `New request with ${customer.passengers} passengers from (${Math.round(loc.x)}, ${Math.round(loc.y)}) to (${Math.round(dest.x)}, ${Math.round(dest.y)})`);
     this.VroomVroomCorp.updateFinancials(10); //change with customer class, maybe based on passengers or distance or smth
   }
+  //ai assisted grid update, only update every 10 frames to save on performance, maybe make this adaptive based on how many drivers there are or something
+
+  updateDriverGrid() {
+    // Clear the grid
+    for (let y = 0; y < this.gridSize; y++) {
+      for (let x = 0; x < this.gridSize; x++) {
+        this.driverGrid[y][x] = new LinkedList();
+      }
+    }
+    // Populate the grid with current driver positions
+    this.availableDrivers.traverse((driver) => {
+      const cellX = Math.floor(driver.location.x / this.cellWidth);
+      const cellY = Math.floor(driver.location.y / this.cellHeight);
+      if (cellX >= 0 && cellX < this.gridSize && cellY >= 0 && cellY < this.gridSize) {
+        this.driverGrid[cellY][cellX].insert(driver);
+      }
+    });
+  }
 
   // Calculate spawn interval based on current simulation time
   // Returns shorter intervals during peak hours for increased spawning rates
@@ -241,6 +274,14 @@ this.activeMatches.traverse((customer) => {
   if (customer.status === "EXPIRED") {
     this.expiredRequests.insert(customer);
     this.activeMatches.delete((c) => c.id === customer.id);
+    if (this.frameCounter % 5 !== 0) return;
+
+      if (customer.status === "EXPIRED") {
+        this.expiredRequests.insert(customer);
+        this.activeMatches.delete((c) => c.id === customer.id);
+        this.addEvent("EXPIRE", `Request ${customer.id} expired after match`);
+      }
+ 
   }
 });
 this.handleRideCompletions();
@@ -352,23 +393,28 @@ customersort()
     // Adjust limit: more requests = fewer drivers evaluated, but not below 3
     const adjustedLimit = Math.max(3, Math.floor(baseLimit - (activeRequests * requestFactor)));
     
-//    Base limit: 20 drivers when there are few requests
-// Scaling: Reduces by 0.05*drivercount/10 per active request
-// Examples:
-// 0 active requests → evaluates 20 drivers
-// 200 active requests → evaluates 10 drivers
-// 340+ active requests → evaluates 3 drivers (minimum)
     const candidates = [];
-    this.availableDrivers.traverse((driver) => {
-      if (driver.status !== "AVAILABLE") return;
-         if (driver.capacity < minCapacity) return;
-      const distance = this.map.getDistance(driver.location, customerLocation);
+    // Use grid-based bucketing to check only nearby drivers
+    const cellX = Math.floor(customerLocation.x / this.cellWidth);
+    const cellY = Math.floor(customerLocation.y / this.cellHeight);
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const cx = cellX + dx;
+        const cy = cellY + dy;
+        if (cx >= 0 && cx < this.gridSize && cy >= 0 && cy < this.gridSize) {
+          this.driverGrid[cy][cx].traverse((driver) => {
+            if (driver.status !== "AVAILABLE") return;
+            if (driver.capacity < minCapacity) return;
+            const distance = this.map.getDistance(driver.location, customerLocation);
             const now = this.timeManager.getSimulationTime();
-      let remaining_ms = customer.expireTime - now;
-      const traveltime = (distance / Math.max(driver.speed, 0.1)) * (1000/60); // time to reach customer in ms
-      if (traveltime > remaining_ms) return; // can't reach in time
-      candidates.push({ driver, distance });
-    });
+            let remaining_ms = customer.expireTime - now;
+            const traveltime = (distance / Math.max(driver.speed, 0.1)) * (1000/60); // time to reach customer in ms
+            if (traveltime > remaining_ms) return; // can't reach in time
+            candidates.push({ driver, distance });
+          });
+        }
+      }
+    }
     // Sort by distance ascending
     candidates.sort((a, b) => a.distance - b.distance);
     // Return top adjustedLimit drivers
@@ -567,6 +613,7 @@ for (let req of requiredAmenities) {
 
 
   renderDrivers() {
+    if (!this.showVisualizations) return;
     // walk the availableDrivers linked list and call display() on each
     this.availableDrivers.traverse((driver) => {
       if (driver && typeof driver.display === "function") {
@@ -588,6 +635,7 @@ for (let req of requiredAmenities) {
   }
 
   renderCustomers() {
+    if (!this.showVisualizations) return;
     // walk the pendingRequests linked list and draw each customer (kill myself)
     this.pendingRequests.traverse((cust) => {
       if (cust.status === "EXPIRED") {
