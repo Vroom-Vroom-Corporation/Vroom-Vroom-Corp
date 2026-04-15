@@ -35,7 +35,7 @@ class SimulationController {
     this.matchTimeIndex = 0;
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 1000; i++) {
           this.spawnRandomDriver();
     }
     //test case for spawning customers at start
@@ -58,7 +58,7 @@ class SimulationController {
     const spawnInterval = Math.max(1, Math.round(baseSpawnInterval));
 
     if (this.frameCounter % spawnInterval === 0) {
-      const spawnCount = Math.max(1, Math.round(this.driverCounter / 200));
+      const spawnCount = Math.max(1, Math.round((this.driverCounter / 200)*timeScale));
       for (let i = 0; i < spawnCount; i++) { // spawn multiple customers if timeScale is high to keep up with accelerated time
         this.spawnRandomCustomer();
       }
