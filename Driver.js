@@ -110,7 +110,7 @@ class Driver {
       }
       if (currentSimTime - this.availableSince > 7 * 24 * 60 * 60 * 1000) {
         //turn off inactive code for high data
-        //this.status = "INACTIVE";
+        this.status = "INACTIVE";
       }
     }
     // Only proceed with movement if we have a target and a passenger

@@ -94,7 +94,7 @@ class SimulationController {
     }
            
     //note: keep drivers constant for now
-    //this.MassLayoffs();
+    this.MassLayoffs();
     // Calculate dynamic spawn interval based on current time
     const baseSpawnInterval = this.calculateSpawnInterval();
     const timeScale = this.timeManager.getTimeScale();
@@ -159,6 +159,8 @@ class SimulationController {
     driver.fireReason = reason;
     this.firedDrivers.insert(driver);
     this.addEvent(driver.id, reason);
+    this.driverCounter--;
+          this.monthlyHiring(); // hire a new driver to replace the fired one, keeping total driver count constant
   }
 
   MassLayoffs() {
@@ -180,12 +182,13 @@ class SimulationController {
         this.fireDriver(driver, "Fired due to inactivity");
        // console.log(driver.id, "fired due to inactivity");
       }
+
     });
   }
 
   monthlyHiring() { //weekly now but whatever
     //every month, hire the avgrating # of drivers (rounded down) remove cost of hiring from earnings, add to expenses, then add new drivers to available drivers linked list
-    const driversToHire = 5; //may cahnge to fixed value 
+    const driversToHire = 1; //may cahnge to fixed value 
     for (let i = 0; i < driversToHire; i++) {
       const d = this.spawnRandomDriver();
       //basic 100. silver 500. gold 1000. platinum 5000.
@@ -201,6 +204,7 @@ class SimulationController {
         hiringCost = 5000;
       }
       this.VroomVroomCorp.incurExpense(hiringCost); // cost of hiring a driver
+      this.driverCounter++;
     }
   }
 
