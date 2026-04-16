@@ -40,9 +40,15 @@ class SimulationController {
     this.matchTimes = [];
     this.matchTimeWindow = 100;
     this.matchTimeIndex = 0;
+    // Idle time tracking for debug mode
+    this.totalCustomerIdleTime = 0;
+    this.totalDriverIdleTime = 0;
+    this.totalCustomerTime = 0;
+    this.totalDriverTime = 0;
+    this.lastIdleUpdateTime = this.timeManager.getSimulationTime();
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 1000; i++) {
           this.spawnRandomDriver();
     }
     // Initialize driver grid with spawned drivers
@@ -58,6 +64,34 @@ class SimulationController {
   update() {
     this.frameCounter++;
 
+    // Update idle time tracking for debug mode
+    const currentTime = this.timeManager.getSimulationTime();
+    const deltaTime = currentTime - this.lastIdleUpdateTime;
+    if (deltaTime > 0) {
+      // Count idle customers (status PENDING)
+      let idleCustomerCount = 0;
+      this.pendingRequests.traverse((customer) => {
+        if (customer.status === "PENDING") {
+          idleCustomerCount++;
+        }
+      });
+      this.totalCustomerIdleTime += idleCustomerCount * deltaTime;
+
+      // Count idle drivers (state IDLE)
+      let idleDriverCount = 0;
+      this.availableDrivers.traverse((driver) => {
+        if (driver.state === "IDLE") {
+          idleDriverCount++;
+        }
+      });
+      this.totalDriverIdleTime += idleDriverCount * deltaTime;
+
+      // Accumulate total existence time
+      this.totalCustomerTime += (this.pendingRequests.size + this.activeMatches.size + this.expiredRequests.size) * deltaTime;
+      this.totalDriverTime += this.availableDrivers.size * deltaTime;
+
+      this.lastIdleUpdateTime = currentTime;
+    }
            
     //note: keep drivers constant for now
     //this.MassLayoffs();
@@ -436,9 +470,24 @@ customersort()
     // => means its a function
     //10 closest drivers
 
-    const closestDrivers = this.findClosestDrivers(customer, customer.location, customer.passengers, 20, 0.05*(this.driverCounter/10));//20 base, -0.05 per req.
-    for (let d of closestDrivers) {//only 10 of the closest drivers with the capacity to reach
+    let candidates = [];
+    if (this.availableDrivers.size <= 50) {
+      // For small number of drivers, search all available drivers, ignore distance
+      this.availableDrivers.traverse((d) => {
+        if (d.status !== "AVAILABLE") return;
+        if (d.capacity < customer.passengers) return;
+        const distance = this.map.getDistance(d.location, customer.location);
+        const now = this.timeManager.getSimulationTime();
+        let remaining_ms = customer.expireTime - now;
+        const traveltime = (distance / Math.max(d.speed, 0.1)) * (1000/60); // time to reach customer in ms
+        if (traveltime > remaining_ms) return; // can't reach in time
+        candidates.push(d);
+      });
+    } else {
+      candidates = this.findClosestDrivers(customer, customer.location, customer.passengers, 20, 0.05*(this.driverCounter/10));
+    }
 
+    for (let d of candidates) {
       //time check
       let distance = this.map.getDistance(d.location, customer.location);
 
@@ -446,7 +495,7 @@ customersort()
      
       //distance score = like 100 - distacee, so closer drivers get higher score
       //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
-      let distanceScore = 100 - distance;
+      let distanceScore = this.availableDrivers.size <= 50 ? 0 : (100 - distance); // ignore distance for small driver count
       let amenityScore = 0;
       let ratingScore = d.avgrating * 20; // convert rating to a score out of 100
 
@@ -701,7 +750,14 @@ for (let req of requiredAmenities) {
     const avgMatchTime = this.matchTimes.length > 0 ? this.matchTimes.reduce((a, b) => a + b, 0) / this.matchTimes.length : 0;
     text(`Avg match time (last 100): ${avgMatchTime.toFixed(2)}ms`, x + 10, y + 40);
     
-    text(`Debug: ${this.pendingRequests.size} pending, ${this.availableDrivers.size} drivers`, x + 10, y + 60);
+    // Calculate average idle time per day per entity
+    const minutesPerDay = 24 * 60;
+    const avgCustomerIdleMinutesPerDay = this.totalCustomerTime > 0 ? (this.totalCustomerIdleTime / this.totalCustomerTime) * minutesPerDay : 0;
+    const avgDriverIdleMinutesPerDay = this.totalDriverTime > 0 ? (this.totalDriverIdleTime / this.totalDriverTime) * minutesPerDay : 0;
+    text(`Avg customer idle time/day: ${avgCustomerIdleMinutesPerDay.toFixed(2)} minutes`, x + 10, y + 60);
+    text(`Avg driver idle time/day: ${avgDriverIdleMinutesPerDay.toFixed(2)} minutes`, x + 10, y + 80);
+    
+    text(`Debug: ${this.pendingRequests.size} pending, ${this.availableDrivers.size} drivers`, x + 10, y + 100);
     
     // Draw pie chart for drivers and customers ai assisted
     let driverIdleCount = 0;
