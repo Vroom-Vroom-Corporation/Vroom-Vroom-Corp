@@ -189,7 +189,7 @@ class SimulationController {
   monthlyHiring() { //weekly now but whatever
     //every month, hire the avgrating # of drivers (rounded down) remove cost of hiring from earnings, add to expenses, then add new drivers to available drivers linked list
     const driversToHire = 1; //may cahnge to fixed value 
-    for (let i = 0; i < driversToHire; i++) {
+    //for (let i = 0; i < driversToHire; i++) {
       const d = this.spawnRandomDriver();
       //basic 100. silver 500. gold 1000. platinum 5000.
 
@@ -204,8 +204,9 @@ class SimulationController {
         hiringCost = 5000;
       }
       this.VroomVroomCorp.incurExpense(hiringCost); // cost of hiring a driver
-      this.driverCounter++;
-    }
+      //this.driverCounter++;
+      console.log("this.driverCounter: " + this.driverCounter);
+   // }
   }
 
   spawnRandomDriver() {
@@ -969,7 +970,7 @@ for (let req of requiredAmenities) {
     if (this.eventLogSize > this.maxEventLogSize) {
   // Traverse and delete old events
   //export log to console for debugging before deleting
-  console.log("Event log exceeded max size. Exporting log:");
+ // console.log("Event log exceeded max size. Exporting log:");
   //turn off for perforance
   // this.eventLog.traverse((e) => {
   //   //console.log("exported event");
