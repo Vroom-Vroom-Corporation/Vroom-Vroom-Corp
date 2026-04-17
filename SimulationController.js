@@ -153,6 +153,7 @@ class SimulationController {
   //hire and fire drivers at the end of each month based on profit and satisfaction
   fireDriver(driver, reason) {
     if (!driver) return;
+    if (driver.status !== "AVAILABLE") return; // only fire available drivers
     const removed = this.availableDrivers.delete((d) => d.id === driver.id);
     if (!removed) return;
     driver.status = "FIRED";

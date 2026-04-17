@@ -9,26 +9,23 @@ class Customer {
     //ai assisted timer for request expiration
     this.requestTime = this.timeManager ? this.timeManager.getSimulationTime() : millis();
     this.amenitiesRequired = [];
-
-    this.amentiys = int(random(0,5)); // modify to ba more realistic
+//50 nothing 30 1 amenity,15 2 amnities, 5 3 amenities
+    this.amnityCount = int(random(0, 100));
+    if (this.amnityCount < 50) {
+      // no amenities required
+    } else if (this.amnityCount < 80) {
+     this.amentiys=1;
+    } else if (this.amnityCount < 95) {
+        this.amentiys=2;
+    } else {  
+        this.amentiys=3;
+    }
+ 
     for (let i = 0; i < this.amentiys; i++) 
     {
-          this.want = int(random(0,5));
-    if (this.want === 0) {
-      this.amenitiesRequired.push("WIFI");
-    }
-      else if (this.want === 1) {
-        this.amenitiesRequired.push("PET_FRIENDLY");
-      }
-        else if (this.want === 2) {
-          this.amenitiesRequired.push("WHEELCHAIR_ACCESSIBLE");
-        }
-            else if (this.want === 3) {
-              this.amenitiesRequired.push("CHILD_SEAT");
-            }
-              else if (this.want === 4) {
-                // NOTHING - leave array empty
-              }
+    this.assignAmenities();
+       
+          
             }
       //initinalizing sub tier
       this.subtier = int(random(1,4));
@@ -49,12 +46,42 @@ class Customer {
     this.Pickedup = false;
     this.atdestination = false;
     //random expire time in real millis, converted to sim time
-    let expireDelay = 30000; // 30 real seconds
+    let expireDelay = 3000; // 30 real seconds
     // expireTime is calculated in simulation time
     // timeScale is already factored into getSimulationTime(), so we don't divide by it here
     this.expireTime = this.requestTime + expireDelay * (this.timeManager ? this.timeManager.simulationSpeed : 1000);
     this.assignedDriver = null; // will store driver object when matched
     // face image, subscrip plan ap ayp check canva
+  }
+
+  assignAmenities(){
+       this.want = int(random(0,100));
+          //50 wifi 25 pet friendly 15 wheelchair accessible 10 child seat
+    if (this.want < 50) {
+      // if already have wifi, assign pet friendly, if already have pet friendly, assign wheelchair accessible, if already have wheelchair accessible, assign child seat
+      if (this.amenitiesRequired.includes("WIFI")) {
+        this.assignAmenities();
+      }
+      this.amenitiesRequired.push("WIFI");
+    }
+      else if (this.want < 75) {
+           if (this.amenitiesRequired.includes("PET_FRIENDLY")) {
+            this.assignAmenities();
+      }
+        this.amenitiesRequired.push("PET_FRIENDLY");
+      }
+        else if (this.want < 90) {
+             if (this.amenitiesRequired.includes("WHEELCHAIR_ACCESSIBLE")) {;
+            this.assignAmenities();
+      }
+          this.amenitiesRequired.push("WHEELCHAIR_ACCESSIBLE");
+        }
+            else if (this.want < 100) {
+                 if (this.amenitiesRequired.includes("CHILD_SEAT")) {
+            this.assignAmenities();
+      }
+              this.amenitiesRequired.push("CHILD_SEAT");
+            }
   }
 
   aknowledgeMatch(driver) {
