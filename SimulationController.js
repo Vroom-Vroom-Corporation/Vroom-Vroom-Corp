@@ -48,7 +48,7 @@ class SimulationController {
     this.lastIdleUpdateTime = this.timeManager.getSimulationTime();
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 10; i++) {
           this.spawnRandomDriver();
     }
     // Initialize driver grid with spawned drivers
@@ -63,6 +63,8 @@ class SimulationController {
 
   update() {
     this.frameCounter++;
+//test
+
 
     // Update idle time tracking for debug mode
     const currentTime = this.timeManager.getSimulationTime();
@@ -153,7 +155,7 @@ class SimulationController {
   //hire and fire drivers at the end of each month based on profit and satisfaction
   fireDriver(driver, reason) {
     if (!driver) return;
-    if (driver.status !== "AVAILABLE") return; // only fire available drivers
+    if (driver.status !== "AVAILABLE" && driver.status !== "INACTIVE") return; // only fire available or inactive drivers
     const removed = this.availableDrivers.delete((d) => d.id === driver.id);
     if (!removed) return;
     driver.status = "FIRED";
@@ -167,9 +169,9 @@ class SimulationController {
   MassLayoffs() {
     this.availableDrivers.traverse((driver) => {
       //add cant fire drivers if list is at or under 5
-      if (this.availableDrivers.size <= 5) {
-        return;
-      }
+      // if (this.availableDrivers.size <= 5) {
+      //   return;
+      // }
 
       if (!driver) return;
 
@@ -684,6 +686,11 @@ for (let req of requiredAmenities) {
           }
 
         driver.display(this.showDriverLabels);
+        //test
+         if (driver.status === "INACTIVE") {
+        this.fireDriver(driver, "Fired due to inactivity");
+       // console.log(driver.id, "fired due to inactivity");
+      }
 
       }
     });
