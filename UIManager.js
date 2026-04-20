@@ -2,9 +2,10 @@ class UIManager {// this page is ai assisted
   constructor() {
     this.sidebarOpen = false;
     this.activeTab = 'customers'; // 'customers', 'drivers', or 'company'
-    this.darkModeEnabled = false;
+    this.darkModeEnabled = true;
     this.initializeLeftSidebar();
     this.initializeRightSidebar();
+    this.applyDarkMode();
   }
 
   initializeLeftSidebar() {
@@ -131,6 +132,20 @@ class UIManager {// this page is ai assisted
     } else {
       sidebar.classList.remove('open');
       toggleBtn.classList.remove('open');
+    }
+  }
+
+  toggleDarkMode() {
+    this.darkModeEnabled = !this.darkModeEnabled;
+    const body = document.body;
+    const toggleBtn = document.getElementById('dark-mode-toggle');
+    
+    if (this.darkModeEnabled) {
+      body.classList.add('dark-mode');
+      toggleBtn.textContent = '☀️';
+    } else {
+      body.classList.remove('dark-mode');
+      toggleBtn.textContent = '🌙';
     }
   }
 
@@ -397,6 +412,15 @@ class UIManager {// this page is ai assisted
         <div class="event-message">${event.message}</div>
       `;
       eventListElement.appendChild(eventElement);
+    }
+  }
+
+  applyDarkMode() {
+    const body = document.body;
+    if (this.darkModeEnabled) {
+      body.classList.add('dark-mode');
+    } else {
+      body.classList.remove('dark-mode');
     }
   }
 

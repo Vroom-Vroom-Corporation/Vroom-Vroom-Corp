@@ -9,7 +9,7 @@ let driverLabelsToggle;
 let customerLabelsToggle;
 let hideVisualizationsToggle;
 let debugModeToggle;
-let darkModeEnabled = false;
+let darkModeEnabled = true;
 //let car;
 function preload() {
   // make sure the path matches where the file actually lives; the image
@@ -26,6 +26,18 @@ function setup() {
   car = new Driver(0, createVector(400, 300));
 
   simulation = new SimulationController(width, height);
+  
+  // Check if there are 1000 or more drivers and adjust settings accordingly
+  if (simulation.availableDrivers.size >= 1000) {
+    simulation.showVisualizations = false;
+    simulation.debugMode = true;
+  }
+  
+  // Check if there are 1000 or more drivers and adjust settings accordingly
+  if (simulation.availableDrivers.size >= 1000) {
+    simulation.showVisualizations = false;
+    simulation.debugMode = true;
+  }
   
   // Pass night map and timeManager to TownMap for day/night transitions ai assisted
   simulation.map.setNightMap(mapviewNight, simulation.timeManager);
@@ -63,6 +75,12 @@ function setup() {
     }
   });
 
+  // Apply initial dark mode
+  darkModeToggle.html('☀️ Light Mode');
+  document.body.classList.add('dark-mode');
+  document.documentElement.classList.add('dark-mode');
+  simulation.uiManager.updateCompanyLogoForDarkMode(true);
+
   // Create label visibility toggles below the map
   driverLabelsToggle = createButton('Hide Driver Labels');
   driverLabelsToggle.position(10, height + 10);
@@ -80,7 +98,7 @@ function setup() {
   //ai assisted
 
   // Create hide all visualizations toggle
-  hideVisualizationsToggle = createButton('Hide All Visualizations');
+  hideVisualizationsToggle = createButton(simulation.showVisualizations ? 'Hide All Visualizations' : 'Show All Visualizations');
   hideVisualizationsToggle.position(10, height + 90);
   hideVisualizationsToggle.mousePressed(() => {
     simulation.showVisualizations = !simulation.showVisualizations;
@@ -88,7 +106,7 @@ function setup() {
   });
 
   // Create debug mode toggle
-  debugModeToggle = createButton('Enable Debug Mode');
+  debugModeToggle = createButton(simulation.debugMode ? 'Disable Debug Mode' : 'Enable Debug Mode');
   debugModeToggle.position(10, height + 130);
   debugModeToggle.mousePressed(() => {
     simulation.debugMode = !simulation.debugMode;
