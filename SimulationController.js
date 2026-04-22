@@ -339,7 +339,7 @@ this.handleRideCompletions();
 //}
 
 csorttimer(requestCount) {
-  // every 500 requests, sort customers based on priority once per 50-request milestone
+  // every 1000 requests, sort customers based on priority once per 50-request milestone
   if (requestCount > 0 && requestCount % 1000 === 0 && 
         requestCount > this.lastCustomerSortCount && 
         this.pendingRequests.size <= 2000)  {
@@ -503,7 +503,7 @@ customersort()
      
       //distance score = like 100 - distacee, so closer drivers get higher score
       //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
-      let distanceScore = (100 - distance);
+      let distanceScore = (100 - distance/5);
       let amenityScore = 0;
       let ratingScore = d.avgrating * 20; // convert rating to a score out of 100
 
