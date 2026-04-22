@@ -95,6 +95,14 @@ class Customer {
     } else {
       this.driversatsfaction = (this.driversatsfaction || 0) - 5; // decrease satisfaction by 5 for a mismatch
     }
+    if (driver.cartier === 2) {
+      this.driversatsfaction += 5; // silver drivers increase satisfaction more
+    } else if (driver.cartier === 3) {
+      this.driversatsfaction += 10; // gold drivers increase satisfaction even more
+       } else if (driver.cartier === 4) {
+      this.driversatsfaction += 15; // platinum drivers increase satisfaction the most
+    
+    }
     //driver.ame
   }
 
