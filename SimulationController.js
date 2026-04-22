@@ -518,7 +518,7 @@ customersort()
       const requiredAmenities = customer.amenitiesRequired || [];
 for (let req of requiredAmenities) {
   if (d.amenitySet && d.amenitySet.has(req)) {
-    amenityScore += 30;
+    amenityScore += 50;
   }
 }
       let currentscore = distanceScore + amenityScore + ratingScore;// add scores
