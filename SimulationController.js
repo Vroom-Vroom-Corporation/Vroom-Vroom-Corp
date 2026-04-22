@@ -600,6 +600,7 @@ for (let req of requiredAmenities) {
             baseFare = 250.00;
             score +=5;
           }
+      
           score += customer.driversatsfaction/5; // increase score based on driver satisfaction, max 5 points
           
           // Clamp score to 0-5 range
