@@ -954,10 +954,15 @@ for (let req of requiredAmenities) {
 
     // Update the UI manager
     if (this.uiManager) {
-      this.uiManager.updateCustomerList(pendingCustomers, matchedCustomers, travelingCustomers, expiredCustomers, this);
-      this.uiManager.updateDriverList(allDrivers, firedDrivers);
+      // Only update customer and driver lists, and event log when visualizations are enabled
+      if (this.showVisualizations) {
+        this.uiManager.updateCustomerList(pendingCustomers, matchedCustomers, travelingCustomers, expiredCustomers, this);
+        this.uiManager.updateDriverList(allDrivers, firedDrivers);
+        this.uiManager.updateEventLog(this.eventLog);
+      }
+      
+      // Always update time display and company info
       this.uiManager.updateTimeDisplay(this.timeManager);
-      this.uiManager.updateEventLog(this.eventLog);
       
       // Update company info
       this.VroomVroomCorp.setActiveDrivers(allDrivers.length);
