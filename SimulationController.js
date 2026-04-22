@@ -503,7 +503,7 @@ customersort()
      
       //distance score = like 100 - distacee, so closer drivers get higher score
       //amenity score = if driver has all amenities, +50, if missing 1 amenity, -20, missing 2 amenities -40, missing 3 amenities -60, missing all amenities -80
-      let distanceScore = this.availableDrivers.size <= 50 ? 0 : (100 - distance); // ignore distance for small driver count
+      let distanceScore = (100 - distance);
       let amenityScore = 0;
       let ratingScore = d.avgrating * 20; // convert rating to a score out of 100
 
