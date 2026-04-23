@@ -507,20 +507,15 @@ customersort()
       let amenityScore = 0;
       let ratingScore = d.avgrating * 20; // convert rating to a score out of 100
 
-      // const requiredAmenities = customer.amenitiesRequired; // note:ai recommeded putting || [];
-      // for (let i = 0; i < requiredAmenities.length; i++) {
-      //   for (let j = 0; j < d.amenities.length; j++) {
-      //     if(d.amenities[j] === requiredAmenities[i]){
-      //       amenityScore += 30;
-      //     }
-      //   }
-      // }
-      const requiredAmenities = customer.amenitiesRequired || [];
-for (let req of requiredAmenities) {
-  if (d.amenitySet && d.amenitySet.has(req)) {
-    amenityScore += 50;
-  }
-}
+       const requiredAmenities = customer.amenitiesRequired; // note:ai inline suggestions recommeded putting || [];
+      for (let i = 0; i < requiredAmenities.length; i++) {
+        for (let j = 0; j < d.amenities.length; j++) {
+          if(d.amenities[j] === requiredAmenities[i]){
+            amenityScore += 30;
+          }
+        }
+      }
+
       let currentscore = distanceScore + amenityScore + ratingScore;// add scores
       if (currentscore > bestScore) {
         bestScore = currentscore;
@@ -544,7 +539,7 @@ for (let req of requiredAmenities) {
       this.activeMatches.insert(customer);
     }
     });
-    //ai assisded data alansiis
+    //ai assisded data alansiis for debhugging and optimization
     const endTime = performance.now();
     this.lastMatchTime = endTime - startTime;
 
