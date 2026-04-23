@@ -91,7 +91,7 @@ class Customer {
     //ai modifed to match modified systems
     const hasRequiredAmenities = this.amenitiesRequired.length === 0 || this.amenitiesRequired.every(amenity => driver.amenities.includes(amenity));
     if (hasRequiredAmenities) {
-      this.driversatsfaction = (this.driversatsfaction || 0) + 5; // increase satisfaction by 5 for a match
+      this.driversatsfaction = (this.driversatsfaction || 0) + 10; // increase satisfaction by 10 for a match
     } else {
       this.driversatsfaction = (this.driversatsfaction || 0) - 5; // decrease satisfaction by 5 for a mismatch
     }
