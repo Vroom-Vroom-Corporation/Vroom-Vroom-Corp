@@ -48,7 +48,7 @@ class SimulationController {
     this.lastIdleUpdateTime = this.timeManager.getSimulationTime();
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 15; i++) {
           this.spawnRandomDriver();
     }
     // Initialize driver grid with spawned drivers
