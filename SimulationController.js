@@ -487,7 +487,7 @@ customersort()
         const distance = this.map.getDistance(d.location, customer.location);
         const now = this.timeManager.getSimulationTime();
         let remaining_ms = customer.expireTime - now;
-        const traveltime = (distance / Math.max(d.speed, 0.1)) * (1000/60); // time to reach customer in ms
+        const traveltime = ((distance / d.speed) * (1000/60))/this.timeScale; // time to reach customer in ms
         if (traveltime > remaining_ms) return; // can't reach in time
         candidates.push(d);
       });
