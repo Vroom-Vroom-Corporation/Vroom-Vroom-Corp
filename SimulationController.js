@@ -447,7 +447,8 @@ for (let dy = -searchRadius; dy <= searchRadius; dy++) {
             const now = this.timeManager.getSimulationTime();
             let remaining_ms = customer.expireTime - now;
             const traveltime = this.calculateTravelTime(distance, driver.speed); // time to reach customer in ms
-            if (traveltime > remaining_ms) return; // can't reach in time
+            const buffer = 1000 / this.timeManager.getTimeScale();
+            if (traveltime > remaining_ms - buffer) return;
             candidates.push({ driver, distance });
           });
         }
@@ -461,6 +462,7 @@ for (let dy = -searchRadius; dy <= searchRadius; dy++) {
 
   processMatching() {
 
+    const buffer = 1000/this.timeManager.getTimeScale(); // 1 second buffer in ms, adjusted for time scale
     const startTime = performance.now();
     // Get the first pending customer
     this.pendingRequests.traverse((customer) => {
@@ -499,9 +501,9 @@ if (remaining_ms <= 0) return;
       //time check
       let distance = this.map.getDistance(d.location, customer.location);
       let traveltime = this.calculateTravelTime(distance, d.speed);
-      let remaining_ms = customer.expireTime - this.timeManager.getSimulationTime();
 
-      if (traveltime > remaining_ms) continue;
+      
+      if (traveltime > remaining_ms-buffer) continue;
       //logging is ai assisted for debugging pruposes
      
       //distance score = like 100 - distacee, so closer drivers get higher score
@@ -534,7 +536,13 @@ if (remaining_ms <= 0) return;
     }
     // If both exist, assign the customer as the driver's target
     if (bestDriver && customer) {
+const distance = this.map.getDistance(bestDriver.location, customer.location);
+const traveltime = this.calculateTravelTime(distance, bestDriver.speed);
 
+if (traveltime > remaining_ms - buffer) {
+  console.log("Blocked late match:", customer.id, bestDriver.id);
+  return;
+}
       bestDriver.assignRide(customer, 300);
       customer.aknowledgeMatch(bestDriver);
       this.addEvent("MATCH", `${customer.id} matched with ${bestDriver.id}`);// debugging by ai
