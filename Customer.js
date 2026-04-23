@@ -6,6 +6,7 @@ class Customer {
     this.passengers = int(random(1, 4));
     this.amenitiesRequired = [];
     this.destination = createVector(destination.x, destination.y); // {x, y} object
+    this.assignedDriver = null; // will hold the matched driver object
     //ai assisted timer for request expiration
     this.requestTime = this.timeManager ? this.timeManager.getSimulationTime() : millis();
     this.amenitiesRequired = [];
@@ -106,7 +107,7 @@ class Customer {
     //driver.ame
   }
 
-  update() {
+  update(sim) {
     //ai assisted timer for request expiration
     const now = this.timeManager ? this.timeManager.getSimulationTime() : millis();
 
@@ -115,6 +116,34 @@ class Customer {
         this.status = "EXPIRED";
       }
     }
+    if (this.status === "MATCHED" && this.assignedDriver) {
+    const now = sim.timeManager.getSimulationTime();
+    const remaining_ms = this.expireTime - now;
+
+    const distance = sim.map.getDistance(
+      this.assignedDriver.location,
+      this.location
+    );
+
+    const traveltime = sim.calculateTravelTime(
+      distance,
+      this.assignedDriver.speed
+    );
+
+    if (traveltime + 2000 > remaining_ms) {
+      this.status = "PENDING";
+
+      this.assignedDriver.status = "AVAILABLE";
+      this.assignedDriver.state = "IDLE";
+
+      this.assignedDriver = null;
+
+      sim.pendingRequests.insert(this);
+      sim.activeMatches.delete((c) => c.id === this.id);
+
+      sim.addEvent("CANCEL", `${this.id} match canceled`);
+    }
+  }
   }
 
 

@@ -113,13 +113,14 @@ class SimulationController {
 //if (this.frameCounter % 5 === 0) {  // Update every 5 frames (helps perforance?)
     this.updateDrivers();
     //ai aissisted
-    if (this.frameCounter % 10 === 0) {
-      this.updateDriverGrid();
-    }
+    //if (this.frameCounter % 10 === 0) {
+    
+    //}
     this.updateCustomers();
 //}
+ this.updateDriverGrid();
    this.processMatching();      // STUDENTS IMPLEMENT
-  // this.handleExpirations();    // STUDENTS IMPLEMENT
+   this.handleExpirations();    // STUDENTS IMPLEMENT
     
     // Update UI sidebar with active customers
     if (this.frameCounter % 10 === 0) { // Update UI every 10 frames to reduce overhead
@@ -300,31 +301,15 @@ class SimulationController {
     // TODO:
     // Traverse driver list and call driver.update()
     this.availableDrivers.traverse((driver) => driver.update());
+    
   }
 
   updateCustomers() {
     this.pendingRequests.traverse((customer) => {
-  customer.update();
-  if (customer.status === "EXPIRED") {
-    this.expiredRequests.insert(customer);
-    this.pendingRequests.delete((c) => c.id === customer.id);
-    this.addEvent("EXPIRE", `Request ${customer.id} expired without match`);
-  }
+  customer.update(this);
 });
 this.activeMatches.traverse((customer) => {
-  customer.update();
-  if (customer.status === "EXPIRED") {
-    this.expiredRequests.insert(customer);
-    this.activeMatches.delete((c) => c.id === customer.id);
-    if (this.frameCounter % 5 !== 0) return;
-
-      if (customer.status === "EXPIRED") {
-        this.expiredRequests.insert(customer);
-        this.activeMatches.delete((c) => c.id === customer.id);
-        this.addEvent("EXPIRE", `Request ${customer.id} expired after match`);
-      }
- 
-  }
+  customer.update(this);
 });
 this.handleRideCompletions();
 
@@ -427,8 +412,17 @@ customersort()
   this.pendingRequests = new LinkedList();
   items.forEach((customer) => this.pendingRequests.insert(customer));
 }
+
+calculateTravelTime(distance, speed) {
+  const timeScale = this.timeManager.getTimeScale();
+  const safeSpeed = Math.max(speed, 0.1);
+
+  return (distance / safeSpeed) * (1000 / 60) / timeScale;
+}
+
 //ai assisted sorting algoritm for distance
   findClosestDrivers(customer, customerLocation, minCapacity, baseLimit, requestFactor) {
+
     // Calculate active requests (pending + active matches)
     const activeRequests = this.pendingRequests.size + this.activeMatches.size;
     
@@ -439,8 +433,10 @@ customersort()
     // Use grid-based bucketing to check only nearby drivers
     const cellX = Math.floor(customerLocation.x / this.cellWidth);
     const cellY = Math.floor(customerLocation.y / this.cellHeight);
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
+const searchRadius = 2; // or dynamic
+
+for (let dy = -searchRadius; dy <= searchRadius; dy++) {
+  for (let dx = -searchRadius; dx <= searchRadius; dx++) {
         const cx = cellX + dx;
         const cy = cellY + dy;
         if (cx >= 0 && cx < this.gridSize && cy >= 0 && cy < this.gridSize) {
@@ -450,7 +446,7 @@ customersort()
             const distance = this.map.getDistance(driver.location, customerLocation);
             const now = this.timeManager.getSimulationTime();
             let remaining_ms = customer.expireTime - now;
-            const traveltime = (distance / Math.max(driver.speed, 0.1)) * (1000/60); // time to reach customer in ms
+            const traveltime = this.calculateTravelTime(distance, driver.speed); // time to reach customer in ms
             if (traveltime > remaining_ms) return; // can't reach in time
             candidates.push({ driver, distance });
           });
@@ -464,15 +460,20 @@ customersort()
   }
 
   processMatching() {
+
     const startTime = performance.now();
     // Get the first pending customer
     this.pendingRequests.traverse((customer) => {
     //prioritize hier teir cousmuers, customer sort here
     if (!customer || customer.status !== "PENDING") return; // no pending requests
+    const now = this.timeManager.getSimulationTime();
+const remaining_ms = customer.expireTime - now;
+
+if (remaining_ms <= 0) return;
     //driver sort
     let bestDriver = null;
     let bestScore = -Infinity;
-  
+       
     // Get the first available driver that can reach within time
     //limit to the x closest drivers, maybe conditional to rush hours
     // => means its a function
@@ -485,9 +486,8 @@ customersort()
         if (d.status !== "AVAILABLE") return;
         if (d.capacity < customer.passengers) return;
         const distance = this.map.getDistance(d.location, customer.location);
-        const now = this.timeManager.getSimulationTime();
-        let remaining_ms = customer.expireTime - now;
-        const traveltime = ((distance / d.speed) * (1000/60))/this.timeScale; // time to reach customer in ms
+
+       const traveltime = this.calculateTravelTime(distance, d.speed); // time to reach customer in ms
         if (traveltime > remaining_ms) return; // can't reach in time
         candidates.push(d);
       });
@@ -498,7 +498,10 @@ customersort()
     for (let d of candidates) {
       //time check
       let distance = this.map.getDistance(d.location, customer.location);
+      let traveltime = this.calculateTravelTime(distance, d.speed);
+      let remaining_ms = customer.expireTime - this.timeManager.getSimulationTime();
 
+      if (traveltime > remaining_ms) continue;
       //logging is ai assisted for debugging pruposes
      
       //distance score = like 100 - distacee, so closer drivers get higher score
@@ -531,6 +534,7 @@ customersort()
     }
     // If both exist, assign the customer as the driver's target
     if (bestDriver && customer) {
+
       bestDriver.assignRide(customer, 300);
       customer.aknowledgeMatch(bestDriver);
       this.addEvent("MATCH", `${customer.id} matched with ${bestDriver.id}`);// debugging by ai
@@ -645,14 +649,14 @@ customersort()
   handleExpirations() {
         // Batch expiration handling - only check every 5 frames
     if (this.frameCounter % 5 !== 0) return;
-    // Move expired from pendingRequests to expiredRequests
-    // this.pendingRequests.traverse((customer) => {
-    //   if (customer.status === "EXPIRED") {
-    //     this.expiredRequests.insert(customer);
-    //     this.pendingRequests.delete((c) => c.id === customer.id);
-    //     this.addEvent("EXPIRE", `Request ${customer.id} expired without match`);
-    //   }
-    // });
+
+    this.pendingRequests.traverse((customer) => {
+      if (customer.status === "EXPIRED") {
+        this.expiredRequests.insert(customer);
+        this.pendingRequests.delete((c) => c.id === customer.id);
+        this.addEvent("EXPIRE", `Request ${customer.id} expired without match`);
+      }
+    });
     // Move expired from activeMatches to expiredRequests
     this.activeMatches.traverse((customer) => {
       if (customer.status === "EXPIRED") {
@@ -696,15 +700,12 @@ customersort()
     if (!this.showVisualizations) return;
     // walk the pendingRequests linked list and draw each customer (kill myself)
     this.pendingRequests.traverse((cust) => {
-      if (cust.status === "EXPIRED") {
-        this.pendingRequests.delete((c) => c.id === cust.id);
-      }
+      // if (cust.status === "EXPIRED") {
+      //   this.pendingRequests.delete((c) => c.id === cust.id);
+      // }
       if (cust && typeof cust.display === "function") {
 
-          if (dist(mouseX, mouseY, cust.location.x, cust.location.y) < 20) {
-            //show destination and path
-            //
-          }
+      
 
         cust.display(this.showCustomerLabels);
 
@@ -713,9 +714,7 @@ customersort()
     
     // also render matched/in-transit customers
     this.activeMatches.traverse((cust) => {
-      if (cust.status === "EXPIRED") {
-        this.activeMatches.delete((c) => c.id === cust.id);
-      }
+
       if (cust && typeof cust.display === "function") {
         cust.display(this.showCustomerLabels);
         if (cust.status === "DELIVERED") {
