@@ -48,7 +48,7 @@ class SimulationController {
     this.lastIdleUpdateTime = this.timeManager.getSimulationTime();
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 5; i++) {
           this.spawnRandomDriver();
     }
     // Initialize driver grid with spawned drivers
@@ -574,7 +574,7 @@ if (traveltime > remaining_ms - buffer) {
     }
   }
 
-//monee
+//money
 
   handleRideCompletions() {
     // Check for completed rides and generate revenue
@@ -712,25 +712,18 @@ if (traveltime > remaining_ms - buffer) {
       //   this.pendingRequests.delete((c) => c.id === cust.id);
       // }
       if (cust && typeof cust.display === "function") {
-
-      
-
         cust.display(this.showCustomerLabels);
-
       }
     });
     
     // also render matched/in-transit customers
     this.activeMatches.traverse((cust) => {
-
       if (cust && typeof cust.display === "function") {
         cust.display(this.showCustomerLabels);
         if (cust.status === "DELIVERED") {
           // Move to expiredRequests or event log as needed
           this.activeMatches.delete((c) => c.id === cust.id);
-         
         }
-
       }
     });
   }
@@ -762,7 +755,7 @@ if (traveltime > remaining_ms - buffer) {
     text("Vroom Vroom Corporation © 2026", x, y);
     text(`Last match time: ${this.lastMatchTime.toFixed(2)}ms`, x + 10, y + 20);
     
-    // Calculate average of last 100 match times
+    // Calculate average of last 100 match times (ai)
     const avgMatchTime = this.matchTimes.length > 0 ? this.matchTimes.reduce((a, b) => a + b, 0) / this.matchTimes.length : 0;
     text(`Avg match time (last 100): ${avgMatchTime.toFixed(2)}ms`, x + 10, y + 40);
     
@@ -796,7 +789,7 @@ if (traveltime > remaining_ms - buffer) {
         driverOtherCount += 1;
       }
     });
-
+//ai
     const pendingCount = this.pendingRequests.size;
     let matchedCount = 0;
     let inTransitCount = 0;
@@ -812,7 +805,7 @@ if (traveltime > remaining_ms - buffer) {
       const pieX = 400;
       const pieY = height - 300;
       const pieRadius = 100;
-      
+      //ai
       // Title
       fill(255);
       textAlign(CENTER);
@@ -830,7 +823,7 @@ if (traveltime > remaining_ms - buffer) {
       const inTransitAngle = (inTransitCount / total) * TWO_PI;
       
       noStroke();
-      
+      //ai
       // Driver idle slice (yellow - warm)
       fill(255, 255, 0);
       arc(pieX, pieY, pieRadius * 2, pieRadius * 2, startAngle, startAngle + driverIdleAngle);
@@ -953,7 +946,7 @@ if (traveltime > remaining_ms - buffer) {
     this.firedDrivers.traverse((driver) => {
       firedDrivers.push(driver);
     });
-
+//ai
     // Update the UI manager
     if (this.uiManager) {
       // Only update customer and driver lists, and event log when visualizations are enabled
