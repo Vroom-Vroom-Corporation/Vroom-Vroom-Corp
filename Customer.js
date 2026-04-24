@@ -47,7 +47,7 @@ class Customer {
     this.Pickedup = false;
     this.atdestination = false;
     //random expire time in real millis, converted to sim time
-    let expireDelay = 3000; // 30 real seconds
+    let expireDelay = 5000; // 5 real seconds
     // expireTime is calculated in simulation time
     // timeScale is already factored into getSimulationTime(), so we don't divide by it here
     this.expireTime = this.requestTime + expireDelay * (this.timeManager ? this.timeManager.simulationSpeed : 1000);
@@ -107,7 +107,7 @@ class Customer {
     //driver.ame
   }
 
-  update(sim) {
+  update() {
     //ai assisted timer for request expiration
     const now = this.timeManager ? this.timeManager.getSimulationTime() : millis();
 
@@ -116,34 +116,7 @@ class Customer {
         this.status = "EXPIRED";
       }
     }
-    if (this.status === "MATCHED" && this.assignedDriver) {
-    const now = sim.timeManager.getSimulationTime();
-    const remaining_ms = this.expireTime - now;
 
-    const distance = sim.map.getDistance(
-      this.assignedDriver.location,
-      this.location
-    );
-
-    const traveltime = sim.calculateTravelTime(
-      distance,
-      this.assignedDriver.speed
-    );
-
-    if (traveltime + 2000 > remaining_ms) {
-      this.status = "PENDING";
-
-      this.assignedDriver.status = "AVAILABLE";
-      this.assignedDriver.state = "IDLE";
-
-      this.assignedDriver = null;
-
-      sim.pendingRequests.insert(this);
-      sim.activeMatches.delete((c) => c.id === this.id);
-
-      sim.addEvent("CANCEL", `${this.id} match canceled`);
-    }
-  }
   }
 
 

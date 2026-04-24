@@ -48,7 +48,7 @@ class SimulationController {
     this.lastIdleUpdateTime = this.timeManager.getSimulationTime();
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 1000; i++) {
           this.spawnRandomDriver();
     }
     // Initialize driver grid with spawned drivers
@@ -306,10 +306,10 @@ class SimulationController {
 
   updateCustomers() {
     this.pendingRequests.traverse((customer) => {
-  customer.update(this);
+  customer.update();
 });
 this.activeMatches.traverse((customer) => {
-  customer.update(this);
+  customer.update();
 });
 this.handleRideCompletions();
 
