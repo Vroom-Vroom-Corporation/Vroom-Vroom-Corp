@@ -3,7 +3,13 @@ class Customer {
     this.timeManager = timeManager;
     this.id = id;
     this.location = createVector(location.x, location.y);
-    this.passengers = int(random(1, 4));
+    // number of passengers 40% 1 passenger, else random between 2 and 4
+    this.passcalc = int(random(0, 100));
+    if (this.passcalc < 40) {
+      this.passengers = 1;
+    } else {
+      this.passengers = int(random(2, 4));
+    }
     this.amenitiesRequired = [];
     this.destination = createVector(destination.x, destination.y); // {x, y} object
     this.assignedDriver = null; // will hold the matched driver object
@@ -29,7 +35,18 @@ class Customer {
           
             }
       //initinalizing sub tier
-      this.subtier = int(random(1,4));
+      this.subtier = null;
+      //subtier basic  50, silver 30, gold 15, platinum 5
+      this.subtierchance=this.amnityCount;
+if (this.subtierchance < 50) {
+  this.subtier = 1; // BASIC
+} else if (this.subtierchance < 80) {
+  this.subtier = 2; // SILVER
+} else if (this.subtierchance < 95) {
+  this.subtier = 3; // GOLD
+} else {
+  this.subtier = 4; // PLATINUM
+}
       this.subscriptionPlan = null;
       if (this.subtier === 1) {
         this.subscriptionPlan = "BASIC";
@@ -127,8 +144,16 @@ class Customer {
     fill(100,100,255); //blue
     rectMode(CENTER);
     rect(this.location.x, this.location.y, 18, 18);
-    
-        fill(255);
+         fill(255);
+    if (this.subscriptionPlan === 1) {
+      fill(200);
+    } else if (this.subscriptionPlan === 2) {
+      fill(168, 168, 168); // Silver
+    } else if (this.subscriptionPlan === 3) {
+      fill(255, 220, 92); // Gold
+    } else if (this.subscriptionPlan === 4) {
+      fill(168, 190, 255); // Platinum
+    }
     if (showLabels) {
       textSize(10);
       textAlign(CENTER);
@@ -141,6 +166,15 @@ class Customer {
       rectMode(CENTER);
       rect(this.location.x, this.location.y, 18, 18);
           fill(255);
+           if (this.subscriptionPlan === 1) {
+      fill(200);
+    } else if (this.subscriptionPlan === 2) {
+      fill(168, 168, 168); // Silver
+    } else if (this.subscriptionPlan === 3) {
+      fill(255, 220, 92); // Gold
+    } else if (this.subscriptionPlan === 4) {
+      fill(168, 190, 255); // Platinum
+    }
     if (showLabels) {
       textSize(10);
       textAlign(CENTER);

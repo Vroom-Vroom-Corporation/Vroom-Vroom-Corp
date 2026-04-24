@@ -251,7 +251,7 @@ moveManhattan() {
       //capacity on the right, speed on the left, total rides below
       text("C:" + this.capacity, this.location.x + 15, this.location.y);
       text("S:" + this.speed, this.location.x - 15, this.location.y);
-      text("R:" + (this.totalrides || 0), this.location.x, this.location.y + 15);
+      text("R:" + (this.totalrides), this.location.x, this.location.y + 15);
     }
   }
 }
