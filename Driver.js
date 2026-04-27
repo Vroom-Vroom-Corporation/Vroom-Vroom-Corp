@@ -1,6 +1,5 @@
 class Driver {
   constructor(id, locationX, locationY, capacity = int(random(1, 4)), amenities = []) {
-    // Allow passing a p5.Vector, a plain object with x/y, or separate numbers
     this.id = id;
     this.totalrides=0;
     this.totalrating = 0;
@@ -102,7 +101,7 @@ class Driver {
   }
 
   update() {
-    //after 7 days of avalible, set status to inactive
+    //after 7 days of avalible, set status to inactive (fires driver)
     if (this.status === "AVAILABLE") {
       let currentSimTime = simulation.timeManager.getSimulationTime();
       if (!this.availableSince) {
@@ -208,7 +207,7 @@ moveManhattan() {
 
 //Direction lines to show drivers movement
 
-    // draw the planned Manhattan path (like a GPS) to the current target
+    // draw the planned Manhattan path to the current target
     if (this.target) {
       let tx = this.target.location.x;
       let ty = this.target.location.y;

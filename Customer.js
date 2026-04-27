@@ -133,13 +133,10 @@ if (this.subtierchance < 50) {
         this.status = "EXPIRED";
       }
     }
-
   }
 
-
+//color coding
   display(showLabels = true) {
-   
-
     if (this.status === "PENDING") {
     fill(100,100,255); //blue
     rectMode(CENTER);
@@ -161,6 +158,7 @@ if (this.subtierchance < 50) {
           text(this.passengers, this.location.x, this.location.y + 14);
           text(Math.max(0, Math.ceil((this.expireTime - this.timeManager.getSimulationTime()) / this.timeManager.simulationSpeed / 1000)), this.location.x-15, this.location.y );
     }
+    //visulization
     } else if (this.status === "MATCHED") {
       fill(255, 100, 100);
       rectMode(CENTER);
@@ -201,7 +199,5 @@ if (this.subtierchance < 50) {
       rectMode(CENTER);
       rect(this.destination.x, this.destination.y, 18, 18);
      }
-
-    //when picked up, change from pickup location to dropoff location, and change color to purple or smth
   }
 }
