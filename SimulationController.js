@@ -48,7 +48,7 @@ class SimulationController {
     this.lastIdleUpdateTime = this.timeManager.getSimulationTime();
     this.addEvent("SYSTEM", "Simulation started");
     //inital spawning for drivers
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 1000; i++) {
           this.spawnRandomDriver();
     }
     // Initialize driver grid with spawned drivers
@@ -176,7 +176,7 @@ class SimulationController {
 
       if (!driver) return;
 
-      if (driver.avgrating < 2 && driver.totalrides >= 10) {//this should be compan rating
+      if (driver.avgrating < 1 && driver.totalrides >= 10) {//this should be compan rating
         this.fireDriver(driver, "Fired due to low rating");
        // console.log(driver.id, "fired due to low rating:", driver.avgrating, "after", driver.totalrides, "rides");
       } else if (driver.avgrating < this.VroomVroomCorp.avgrating && driver.totalrides >= 20) {
@@ -289,7 +289,7 @@ class SimulationController {
     // combine base interval with rating and driver supply
     const interval = baseInterval / (1 * driverSpawnFactor); //change 1 to ratingFactor
     
-    // Reduce spawn rate to 30% during night hours (10 PM to 6 AM)
+    // Reduce spawn rate to 30% during night hours (10 PM to 6 AM) ai assist
     const isNight = hour >= 22 || hour < 6;
     const nightMultiplier = isNight ? 1 / 0.3 : 1;
     const adjustedInterval = interval * nightMultiplier;

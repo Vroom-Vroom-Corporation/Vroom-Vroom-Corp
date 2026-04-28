@@ -5,7 +5,7 @@ class Customer {
     this.location = createVector(location.x, location.y);
     // number of passengers 40% 1 passenger, else random between 2 and 4
     this.passcalc = int(random(0, 100));
-    if (this.passcalc < 40) {
+    if (this.passcalc < 80) {
       this.passengers = 1;
     } else {
       this.passengers = int(random(2, 4));
